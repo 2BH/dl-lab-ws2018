@@ -5,12 +5,13 @@ class LeNet_class:
 # convolutional neural network
     
     # constructor
-    def __init__(self, learning_rate = 0.01, num_filters = 16, batch_size = 64, num_epochs = 100, model_name = "lenet"):
+    def __init__(self, learning_rate = 0.01, num_filters = 16, batch_size = 64, num_epochs = 100, model_name = "lenet", filter_size = 3):
         self.learning_rate = learning_rate
         self.num_filters = num_filters
         self.batch_size = batch_size
         self.num_epochs = num_epochs
         self.model_name = model_name
+        self.filter_size = filter_size
 
     # create placeholder for input data
     def create_placeholder(self, x_shape, y_shape):
@@ -82,7 +83,7 @@ class LeNet_class:
         tf.reset_default_graph()
         # init the model
         self.create_placeholder(X_train.shape[1:3], y_train.shape[1])
-        self.init_parameter(3, 3)
+        self.init_parameter(self.filter_size, self.filter_size)
         total_batch_num = X_train.shape[0] // self.batch_size
         train_cost = np.zeros((self.num_epochs))
         train_accuracy = np.zeros((self.num_epochs))

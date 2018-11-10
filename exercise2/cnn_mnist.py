@@ -61,12 +61,12 @@ def mnist(datasets_dir='./data'):
     return train_x, one_hot(train_y), valid_x, one_hot(valid_y), test_x, one_hot(test_y)
 
 
-def train_and_validate(x_train, y_train, x_valid, y_valid, num_epochs, lr, num_filters, batch_size):
+def train_and_validate(x_train, y_train, x_valid, y_valid, num_epochs, lr, num_filters, batch_size, filter_size):
     # TODO: train and validate your convolutional neural networks with the provided data and hyperparameters
-    model = LeNet_class(learning_rate = lr, num_filters = num_filters, num_epochs = num_epochs, batch_size = batch_size)
-    train_accruacy, learning_curve, train_cost = model.train(x_train, y_train, x_valid, y_valid)
+    model = LeNet_class(learning_rate = lr, num_filters = num_filters, num_epochs = num_epochs, batch_size = batch_size, filter_size = filter_size)
+    train_accuracy, learning_curve, train_cost = model.train(x_train, y_train, x_valid, y_valid)
     
-    return list(learning_curve), model  # TODO: Return the validation error after each epoch (i.e learning curve) and your model
+    return list(learning_curve), model, train_accuracy  # TODO: Return the validation error after each epoch (i.e learning curve) and your model
 
 
 def test(x_test, y_test, model):
@@ -89,6 +89,8 @@ if __name__ == "__main__":
                         help="Determines how many epochs the network will be trained")
     parser.add_argument("--run_id", default=0, type=int, nargs="?",
                         help="Helps to identify different runs of an experiments")
+    parser.add_argument("--filter_size", default=3, type=int, nargs="?",
+                        help="Determine the size of the filter")
 
     args = parser.parse_args()
 
@@ -97,11 +99,11 @@ if __name__ == "__main__":
     num_filters = args.num_filters
     batch_size = args.batch_size
     epochs = args.epochs
-
+    filter_size = args.filter_size
     # train and test convolutional neural network
     x_train, y_train, x_valid, y_valid, x_test, y_test = mnist(args.input_path)
 
-    learning_curve, model = train_and_validate(x_train, y_train, x_valid, y_valid, epochs, lr, num_filters, batch_size)
+    learning_curve, model, _ = train_and_validate(x_train, y_train, x_valid, y_valid, epochs, lr, num_filters, batch_size, filter_size)
 
     test_error = test(x_test, y_test, model)
 
@@ -112,6 +114,7 @@ if __name__ == "__main__":
     results["batch_size"] = batch_size
     results["learning_curve"] = learning_curve
     results["test_error"] = test_error
+    results["filter_size"] = filter_size
 
     path = os.path.join(args.output_path, "results")
     os.makedirs(path, exist_ok=True)
