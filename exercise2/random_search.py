@@ -57,45 +57,10 @@ class MyWorker(Worker):
     def get_configspace():
         cs = CS.ConfigurationSpace()
         lr = CSH.UniformFloatHyperparameter('learning_rate', lower=1e-4, upper=1e-1, default_value=1e-2, log=True)
-
-        # For demonstration purposes, we add different optimizers as categorical hyperparameters.
-        # To show how to use conditional hyperparameters with ConfigSpace, we'll add the optimizers 'Adam' and 'SGD'.
-        # SGD has a different parameter 'momentum'.
-        #optimizer = CSH.CategoricalHyperparameter('optimizer', ['Adam', 'SGD'])
-
-        #sgd_momentum = CSH.UniformFloatHyperparameter('sgd_momentum', lower=0.0, upper=0.99, default_value=0.9, log=False)
-
-        #cs.add_hyperparameters([lr])
-
-
-
-        #num_conv_layers =  CSH.UniformIntegerHyperparameter('num_conv_layers', lower=1, upper=3, default_value=2)
         batch_size = CSH.UniformIntegerHyperparameter('batch_size', lower=16, upper=128, default_value=32, log=True)
         num_filters = CSH.UniformIntegerHyperparameter('num_filters', lower=8, upper=64, default_value=16, log=True)
         filter_size = CSH.UniformIntegerHyperparameter('filter_size', lower=3, upper=5, default_value=4, log=False)
-        #num_filters_2 = CSH.UniformIntegerHyperparameter('num_filters_2', lower=4, upper=64, default_value=16, log=True)
-        #num_filters_3 = CSH.UniformIntegerHyperparameter('num_filters_3', lower=4, upper=64, default_value=16, log=True)
-
         cs.add_hyperparameters([lr, num_filters, filter_size, batch_size])
-
-
-        #dropout_rate = CSH.UniformFloatHyperparameter('dropout_rate', lower=0.0, upper=0.9, default_value=0.5, log=False)
-        #num_fc_units = CSH.UniformIntegerHyperparameter('num_fc_units', lower=8, upper=256, default_value=32, log=True)
-
-        #cs.add_hyperparameters([dropout_rate, num_fc_units])
-
-
-        # The hyperparameter sgd_momentum will be used,if the configuration
-        # contains 'SGD' as optimizer.
-        #cond = CS.EqualsCondition(sgd_momentum, optimizer, 'SGD')
-        #cs.add_condition(cond)
-        
-        # You can also use inequality conditions:
-        #cond = CS.GreaterThanCondition(num_filters_2, num_conv_layers, 1)
-        #cs.add_condition(cond)
-
-        #cond = CS.GreaterThanCondition(num_filters_3, num_conv_layers, 2)
-        #cs.add_condition(cond)
         # TODO: Implement configuration space here. See https://github.com/automl/HpBandSter/blob/master/hpbandster/examples/example_5_keras_worker.py  for an example
 
         return cs
