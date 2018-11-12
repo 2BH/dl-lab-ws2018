@@ -85,6 +85,7 @@ class LeNet_class:
         self.create_placeholder(X_train.shape[1:3], y_train.shape[1])
         self.init_parameter(self.filter_size, self.filter_size)
         total_batch_num = X_train.shape[0] // self.batch_size
+        total_batch_num_valid = X_valid.shape[0] // self.batch_size
         train_cost = np.zeros((self.num_epochs))
         train_accuracy = np.zeros((self.num_epochs))
         valid_accuracy = np.zeros((self.num_epochs))
@@ -115,12 +116,20 @@ class LeNet_class:
                     # select the batch data
                     X_batch = X_train[b*self.batch_size:(b+1)*self.batch_size,:,:,:]
                     y_batch = y_train[b*self.batch_size:(b+1)*self.batch_size,:]
-                        # compute the cost
+                    # compute the cost
                     _ , temp_cost = sess.run([optimizer, cost], feed_dict={self.x_input:X_batch, self.y_label:y_batch})
                     train_cost[epoch] += temp_cost / self.batch_size
-
-                train_accuracy[epoch] = accuracy.eval({self.x_input: X_train, self.y_label: y_train})
-                valid_accuracy[epoch] = accuracy.eval({self.x_input: X_valid, self.y_label: y_valid})
+		
+                for b in range(total_batch_num):
+                    X_batch = X_train[b*self.batch_size:(b+1)*self.batch_size,:,:,:]
+                    y_batch = y_train[b*self.batch_size:(b+1)*self.batch_size,:]
+                    train_accuracy[epoch] += accuracy.eval({self.x_input: X_batch, self.y_label: y_batch})
+                for b in range(total_batch_num_valid):
+                    X_valid_batch = X_valid[b*self.batch_size:(b+1)*self.batch_size,:,:,:]
+                    y_valid_batch = y_valid[b*self.batch_size:(b+1)*self.batch_size,:]
+                    valid_accuracy[epoch] += accuracy.eval({self.x_input: X_valid_batch, self.y_label: y_valid_batch})
+                train_accuracy[epoch] = train_accuracy[epoch] / total_batch_num
+                valid_accuracy[epoch] = valid_accuracy[epoch] / total_batch_num_valid
                 print("[%d/%d]: train_accuracy: %.4f, valid_accuracy: %.4f" %(epoch+1, self.num_epochs, train_accuracy[epoch], valid_accuracy[epoch]))
 
             # save the model
@@ -135,15 +144,20 @@ class LeNet_class:
 
         filepath = "./model/" + self.model_name + ".meta"
         saver = tf.train.import_meta_graph(filepath)
+        total_num_batch = X_test.shape[0] // self.batch_size
+        test_error = 0
         with tf.Session() as sess:
             # load the session
             saver.restore(sess, tf.train.latest_checkpoint("./model"))
-            # calculate the test error
             y_pred = tf.get_collection("pred_network")[0]
-            prediction = np.array(sess.run(y_pred, feed_dict = {self.x_input: X_test}))
-            test_error = float(np.sum(prediction != np.argmax(y_test, axis = 1)) / y_test.shape[0])
-            print("test error: %.4f" %test_error)
-
+            # calculate the test error
+            for b in range(total_num_batch):
+                X_batch = X_test[b*self.batch_size:(b+1)*self.batch_size,:,:,:]
+                y_batch = y_test[b*self.batch_size:(b+1)*self.batch_size,:]
+                prediction = np.array(sess.run(y_pred, feed_dict = {self.x_input: X_batch}))
+                test_error += float(np.sum(prediction != np.argmax(y_batch, axis = 1))) / (total_num_batch * self.batch_size)
+        print("test error: %.4f" %test_error)
+        # print("test error: %.4f" %test_error)
         return test_error
 
 

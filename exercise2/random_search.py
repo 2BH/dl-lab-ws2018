@@ -56,7 +56,7 @@ class MyWorker(Worker):
     @staticmethod
     def get_configspace():
         cs = CS.ConfigurationSpace()
-        lr = CSH.UniformFloatHyperparameter('learning_rate', lower=1e-4, upper=1e-1, default_value='1e-2', log=True)
+        lr = CSH.UniformFloatHyperparameter('learning_rate', lower=1e-4, upper=1e-1, default_value=1e-2, log=True)
 
         # For demonstration purposes, we add different optimizers as categorical hyperparameters.
         # To show how to use conditional hyperparameters with ConfigSpace, we'll add the optimizers 'Adam' and 'SGD'.
@@ -103,8 +103,8 @@ class MyWorker(Worker):
 
 parser = argparse.ArgumentParser(description='Example 1 - sequential and local execution.')
 parser.add_argument('--budget', type=float,
-                    help='Maximum budget used during the optimization, i.e the number of epochs.', default=2)
-parser.add_argument('--n_iterations', type=int, help='Number of iterations performed by the optimizer', default=4)
+                    help='Maximum budget used during the optimization, i.e the number of epochs.', default=6)
+parser.add_argument('--n_iterations', type=int, help='Number of iterations performed by the optimizer', default=50)
 args = parser.parse_args()
 
 # Step 1: Start a nameserver
@@ -159,4 +159,14 @@ hpvis.losses_over_time(all_runs)
 import matplotlib.pyplot as plt
 plt.savefig("random_search.png")
 
-# TODO: retrain the best configuration (called incumbent) and compute the test error
+# TODO: retrain the best configuration (called incumbent) and compute the test erro
+epochs = 12
+lr = id2config[incumbent]['config']["learning_rate"]
+num_filters = id2config[incumbent]['config']["num_filters"]
+batch_size = id2config[incumbent]['config']["batch_size"]
+filter_size = id2config[incumbent]['config']["filter_size"]
+
+validation_accuracy, model, train_accuracy = train_and_validate(w.x_train, w.y_train, w.x_valid, w.y_valid, epochs, lr, num_filters, batch_size, filter_size)
+validation_error = list(1 - np.array(validation_accuracy))[-1]
+test_error = test(w.x_test, w.y_test, model)
+print("test_error of the best model is: %.4f" %test_error)
