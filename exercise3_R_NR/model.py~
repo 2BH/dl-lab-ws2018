@@ -34,7 +34,7 @@ class Model:
 
         # TODO: Loss and optimizer
         self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.output, labels=self.y_label))
-        self.optimizer = tf.train.GradientDescentOptimizer(learning_rate=self.learning_rate).minimize(self.cost)
+        self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.cost)
         # TODO: Start tensorflow session
         self.sess = tf.Session()
 
