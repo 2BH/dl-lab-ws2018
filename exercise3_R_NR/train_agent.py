@@ -72,7 +72,7 @@ def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
     return X_train_history, y_train, X_valid_history, y_valid
 
 
-def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, model_dir="./models", tensorboard_dir="./tensorboard"):
+def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, history_length=1, model_dir="./models", tensorboard_dir="./tensorboard"):
     
     # create result and model folders
     if not os.path.exists(model_dir):
@@ -82,7 +82,7 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, mode
 
 
     # TODO: specify your neural network in model.py 
-    agent = Model(learning_rate=lr)
+    agent = Model(learning_rate=lr, history_length=history_length)
     
     # tensorboard_eval = Evaluation(tensorboard_dir)
 
@@ -114,7 +114,7 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, mode
         index = np.random.permutation(X_train.shape[0])
         X_train, y_train = X_train[index], y_train[index]
         print(X_train.shape)
-	for b in range(total_batch_num):
+        for b in range(total_batch_num):
             # select the batch data
             X_batch = X_train[b*batch_size:(b+1)*batch_size,:,:,:]
             y_batch = y_train[b*batch_size:(b+1)*batch_size,:]
@@ -139,7 +139,8 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, mode
     #     tensorboard_eval.write_episode_data(...)
       
     # TODO: save your agent
-    model_dir = agent.save(os.path.join(model_dir, "agent.ckpt"))
+    agent.save(os.path.join(model_dir, "agent.ckpt"))
+    print(model_dir)
     print("Model saved in file: %s" % model_dir)
     agent.sess.close()
 
@@ -147,9 +148,9 @@ if __name__ == "__main__":
 
     # read data    
     X_train, y_train, X_valid, y_valid = read_data("./data")
-
+    history_length = 3
     # preprocess data
-    X_train, y_train, X_valid, y_valid = preprocessing(X_train, y_train, X_valid, y_valid, history_length=1)
+    X_train, y_train, X_valid, y_valid = preprocessing(X_train, y_train, X_valid, y_valid, history_length)
     # train model (you can change the parameters!)
-    train_model(X_train, y_train, X_valid, y_valid, epochs=10, batch_size=64, lr=0.1)
+    train_model(X_train, y_train, X_valid, y_valid, history_length=history_length, epochs=10, batch_size=64, lr=0.0004)
  
