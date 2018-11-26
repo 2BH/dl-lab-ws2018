@@ -7,7 +7,7 @@ class Model:
         self.learning_rate = learning_rate 
         # variable for input and labels
         self.x_input = tf.placeholder(dtype=tf.float32, shape = [None, 96, 96, history_length], name = "x_input")
-        self.y_label = tf.placeholder(dtype=tf.float32, shape = [None, 4], name = "y_label")
+        self.y_label = tf.placeholder(dtype=tf.float32, shape = [None, 3], name = "y_label")
 
         # first layers + relu
         self.W_conv1 = tf.get_variable("W_conv1", [8, 8, history_length, 64], initializer=tf.contrib.layers.xavier_initializer())
@@ -24,18 +24,17 @@ class Model:
         
         flatten = tf.contrib.layers.flatten(a3)
         # first dense layer + relu + dropout
-        z4 = tf.contrib.layers.fully_connected(flatten, 256, activation_fn=tf.nn.relu)
+        z4 = tf.contrib.layers.fully_connected(flatten, 400, activation_fn=tf.nn.relu)
         z4_drop = tf.nn.dropout(z4, 0.7)
         # second dense layer + relu:
-        z5 = tf.contrib.layers.fully_connected(z4_drop, 256, activation_fn=tf.nn.relu)
+        z5 = tf.contrib.layers.fully_connected(z4_drop, 400, activation_fn=tf.nn.relu)
         z5_drop = tf.nn.dropout(z5, 0.7)
         # third dense layer + relu 
         z6 = tf.contrib.layers.fully_connected(z5_drop, 50, activation_fn=tf.nn.relu)
         # output layer:
-        self.output = tf.contrib.layers.fully_connected(z6, 4, activation_fn=None)
-
+        self.output = tf.contrib.layers.fully_connected(z6, 3, activation_fn=None)
         # TODO: Loss and optimizer
-        self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.output, labels=self.y_label))
+        self.cost = tf.reduce_mean(tf.losses.mean_squared_error(predictions=self.output, labels=self.y_label))
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.cost)
         # TODO: Start tensorflow session
         self.sess = tf.Session()

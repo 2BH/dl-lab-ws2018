@@ -54,9 +54,10 @@ def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
     X_valid_history = X_valid_history.transpose(0,2,3,1)
     
     # discretize actions
-    y_train_id = np.zeros(y_train.shape[0])
-    y_valid_id = np.zeros(y_valid.shape[0])
+    # y_train_id = np.zeros(y_train.shape[0])
+    # y_valid_id = np.zeros(y_valid.shape[0])
     
+    """   
     for i in range(y_train.shape[0]):
         y_train_id[i] = action_to_id(y_train[i])
     for j in range(y_valid.shape[0]):
@@ -65,6 +66,7 @@ def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
     y_valid_id = y_valid_id.astype(int)
     y_train = one_hot(y_train_id)
     y_valid = one_hot(y_valid_id)
+    """
     # History:
     # At first you should only use the current image as input to your network to learn the next action. Then the input states
     # have shape (96, 96,1). Later, add a history of the last N images to your state so that a state has shape (96, 96, N).
@@ -83,19 +85,19 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, hist
 
     # TODO: specify your neural network in model.py 
     agent = Model(learning_rate=lr, history_length=history_length)
-    
-    # tensorboard_eval = Evaluation(tensorboard_dir)
-
     init = tf.global_variables_initializer()
-
-    # calculate the accuracy
-    y_pred = tf.argmax(agent.output, 1)
-    # tf.add_to_collection('pred_network', y_pred)
-    correct_pred = tf.equal(y_pred, tf.argmax(agent.y_label, 1))
-    # calculate train and valid accuracy
-    accuracy = tf.reduce_mean(tf.cast(correct_pred, "float"))
-    # init all variables
     agent.sess.run(init)
+    tensorboard_eval = Evaluation(tensorboard_dir)
+    tf.reset_default_graph()
+    
+    # calculate the accuracy
+    # y_pred = tf.argmax(agent.output, 1)
+    # tf.add_to_collection('pred_network', y_pred)
+    # correct_pred = tf.equal(agent.y_pred, tf.argmax(agent.y_label, 1))
+    # calculate train and valid accuracy
+    # accuracy = tf.reduce_mean(tf.cast(correct_pred, "float"))
+    # init all variables
+    
     # TODO: implement the training
     # 
     # 1. write a method sample_minibatch and perform an update step
@@ -106,9 +108,8 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, hist
     total_batch_num_valid = X_valid.shape[0] // batch_size;
     # training loop
     train_cost = np.zeros((epochs))
-    train_accuracy = np.zeros((epochs))
-    valid_accuracy = np.zeros((epochs))
-    print("total_batch_num is: %d" % total_batch_num)
+    # train_accuracy = np.zeros((epochs))
+    valid_cost = np.zeros((epochs))
     for epoch in range(epochs):
         # shuffle the data set
         index = np.random.permutation(X_train.shape[0])
@@ -116,27 +117,28 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, hist
         print(X_train.shape)
         for b in range(total_batch_num):
             # select the batch data
-            X_batch = X_train[b*batch_size:(b+1)*batch_size,:,:,:]
-            y_batch = y_train[b*batch_size:(b+1)*batch_size,:]
+            X_batch = X_train[b*batch_size:(b+1)*batch_size]
+            y_batch = y_train[b*batch_size:(b+1)*batch_size]
             # compute the cost
             _ , temp_cost = agent.sess.run([agent.optimizer, agent.cost], feed_dict={agent.x_input:X_batch, agent.y_label:y_batch})
-            train_cost[epoch] += temp_cost / batch_size
-        
-        # training accuracy
-        for b in range(total_batch_num):
-            X_batch = X_train[b*batch_size:(b+1)*batch_size,:,:,:]
-            y_batch = y_train[b*batch_size:(b+1)*batch_size,:]
-            train_accuracy[epoch] += accuracy.eval({agent.x_input: X_batch, agent.y_label: y_batch}, session=agent.sess)
 
-        # validation accuracy
+        
+        # training cost
+        for b in range(total_batch_num):
+            X_batch = X_train[b*batch_size:(b+1)*batch_size]
+            y_batch = y_train[b*batch_size:(b+1)*batch_size]
+            train_cost[epoch] += agent.sess.run(agent.cost, feed_dict={agent.x_input: X_batch, agent.y_label: y_batch})
+
+        # validation cost
         for b in range(total_batch_num_valid):
-            X_valid_batch = X_valid[b*batch_size:(b+1)*batch_size,:,:,:]
-            y_valid_batch = y_valid[b*batch_size:(b+1)*batch_size,:]
-            valid_accuracy[epoch] += accuracy.eval({agent.x_input: X_valid_batch, agent.y_label: y_valid_batch}, session=agent.sess)
-        train_accuracy[epoch] = train_accuracy[epoch] / total_batch_num
-        valid_accuracy[epoch] = valid_accuracy[epoch] / total_batch_num_valid
-        print("[%d/%d]: train_accuracy: %.4f, valid_accuracy: %.4f" %(epoch+1, epochs, train_accuracy[epoch], valid_accuracy[epoch]))
-    #     tensorboard_eval.write_episode_data(...)
+            X_valid_batch = X_valid[b*batch_size:(b+1)*batch_size]
+            y_valid_batch = y_valid[b*batch_size:(b+1)*batch_size]
+            valid_cost[epoch] += agent.sess.run(agent.cost, feed_dict={agent.x_input:X_valid_batch, agent.y_label:y_valid_batch})
+        train_cost[epoch] = train_cost[epoch] / total_batch_num
+        valid_cost[epoch] = valid_cost[epoch] / total_batch_num_valid
+        print("[%d/%d]: train_cost: %.4f, valid_cost: %.4f" %(epoch+1, epochs, train_cost[epoch], valid_cost[epoch]))
+        eval_dict = {"train":train_cost[epoch], "valid":valid_cost[epoch]}
+        tensorboard_eval.write_episode_data(epoch, eval_dict)
       
     # TODO: save your agent
     agent.save(os.path.join(model_dir, "agent.ckpt"))
@@ -148,9 +150,9 @@ if __name__ == "__main__":
 
     # read data    
     X_train, y_train, X_valid, y_valid = read_data("./data")
-    history_length = 3
+    history_length = 1
     # preprocess data
     X_train, y_train, X_valid, y_valid = preprocessing(X_train, y_train, X_valid, y_valid, history_length)
     # train model (you can change the parameters!)
-    train_model(X_train, y_train, X_valid, y_valid, history_length=history_length, epochs=10, batch_size=64, lr=0.0004)
+    train_model(X_train, y_train, X_valid, y_valid, history_length=history_length, epochs=20, batch_size=64, lr=0.0004)
  
