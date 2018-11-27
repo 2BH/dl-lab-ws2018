@@ -57,6 +57,25 @@ def id_to_action(labels_id):
     labels_action[labels_id==BRAKE] = [0.0, 0.0, 0.8]
     return labels_action
 
+def uniform_sampling(X_train, y_train_id_n, num_samples):
+    n = X_train.shape[0]
+    weights = np.zeros(n)
+    left_indices = y_train_id_n == LEFT
+    weights[y_train_id_n == LEFT] = n / np.sum(left_indices)
+    right_indices = y_train_id_n == RIGHT
+    weights[y_train_id_n == RIGHT] = n / np.sum(right_indices)
+    straight_indices = y_train_id_n == STRAIGHT
+    weights[y_train_id_n == STRAIGHT] = n / np.sum(straight_indices)
+    acce_indices = y_train_id_n == ACCELERATE
+    weights[y_train_id_n == ACCELERATE] = n / np.sum(acce_indices)
+    brake_indices = y_train_id_n == BRAKE
+    weights[y_train_id_n == BRAKE] = n / np.sum(brake_indices)
+    weights = weights / np.sum(weights)
+    samples_indices = np.random.choice(np.arange(n), num_samples, p = weights)
+    
+    return X_train[samples_indices], y_train_id_n[samples_indices]
+
+
 def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
 
     # TODO: preprocess your data here.
