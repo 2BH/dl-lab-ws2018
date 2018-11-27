@@ -78,13 +78,13 @@ def uniform_sampling(X_train, y_train_id_n, num_samples):
 
 def sample_minibatch(X_train, y_train, b=0, batch_size=64, history_length=1):
     # get small batch
-    X_batch = np.zeros((batch_size, X_train.shape[1], X_train.shape[2], history_length))
-    for i in range(history_length):
-        X_batch[:,:,:,i] = X_train[i+b*batch_size:i+(b+1)*batch_size]
-    y_batch = y_train[history_length-1+b*batch_size:history_length-1+(b+1)*batch_size]
+    #X_batch = np.zeros((batch_size, X_train.shape[1], X_train.shape[2], history_length))
+    #for i in range(history_length):
+    #    X_batch[:,:,:,i] = X_train[i+b*batch_size:i+(b+1)*batch_size]
+    #y_batch = y_train[history_length-1+b*batch_size:history_length-1+(b+1)*batch_size]
     # shuffle data
-    index = np.random.permutation(batch_size)
-    X_batch, y_batch = X_batch[index], y_batch[index]
+    #index = np.random.permutation(batch_size)
+    X_batch, y_batch = X_train[b*batch_size:(b+1)*batch_size], y_train[b*batch_size:(b+1)*batch_size]
     return X_batch, y_batch
 
 
@@ -98,7 +98,7 @@ def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
     X_train = rgb2gray(X_train)
     X_valid = rgb2gray(X_valid)
     # history:
-    """
+    
     X_train_history = np.zeros((X_train.shape[0]-history_length+1, history_length, X_train.shape[1], X_train.shape[2]))
     for i in range(X_train_history.shape[0]):
         X_train_history[i] = X_train[i:i+history_length,:,:]
@@ -108,24 +108,25 @@ def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
     for i in range(X_valid_history.shape[0]):
         X_valid_history[i] = X_valid[i:i+history_length,:,:]
     X_valid_history = X_valid_history.transpose(0,2,3,1)
-    """
+    
+    y_valid_history = y_valid[history_length-1:]
     # discretize actions
-    y_train_id = np.zeros(y_train.shape[0])
-    y_valid_id = np.zeros(y_valid.shape[0])
+    y_train_id = np.zeros(y_train.shape[0]-history_length+1)
+    # y_valid_id = np.zeros(y_valid.shape[0]-history_length+1)
     
     # data augmentation
-    for i in range(y_train.shape[0]):
-        y_train_id[i] = action_to_id(y_train[i])
-
+    for i in range(y_train.shape[0]-history_length+1):
+        y_train_id[i] = action_to_id(y_train[i+history_length-1])
+ 
     # X_train_n, y_train_id_n = data_augmentation(X_train, y_train_id)
-    X_train_sampled, y_train_id_sampled = uniform_sampling(X_train, y_train_id, num_samples=12000)
+    X_train_sampled, y_train_id_sampled = uniform_sampling(X_train_history, y_train_id, num_samples=12000)
 
     y_train_action = id_to_action(y_train_id_sampled)
     # History:
     # At first you should only use the current image as input to your network to learn the next action. Then the input states
     # have shape (96, 96,1). Later, add a history of the last N images to your state so that a state has shape (96, 96, N).
     
-    return X_train_sampled, y_train_action, X_valid, y_valid
+    return X_train_sampled, y_train_action, X_valid_history, y_valid_history
 
 
 def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, history_length=1, model_dir="./models", tensorboard_dir="./tensorboard"):
@@ -166,8 +167,8 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, hist
     valid_cost = np.zeros((epochs))
     for epoch in range(epochs):
         # shuffle the data set
-        # index = np.random.permutation(X_train.shape[0])
-        # X_train, y_train = X_train[index], y_train[index]
+        index = np.random.permutation(X_train.shape[0])
+        X_train, y_train = X_train[index], y_train[index]
         # print(X_train.shape)
         for b in range(total_batch_num):
             # select the batch data
@@ -200,7 +201,7 @@ if __name__ == "__main__":
 
     # read data    
     X_train, y_train, X_valid, y_valid = read_data("./data")
-    history_length = 1
+    history_length = 3
     # preprocess data
     X_train, y_train, X_valid, y_valid = preprocessing(X_train, y_train, X_valid, y_valid, history_length)
     # train model (you can change the parameters!)
