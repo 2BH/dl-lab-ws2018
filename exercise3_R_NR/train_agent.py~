@@ -182,7 +182,7 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, hist
 
         # validation cost
         for b in range(total_batch_num_valid):
-            X_valid_batch, y_valid_batch = sample_minibatch(X_train, y_train, b, batch_size, history_length)
+            X_valid_batch, y_valid_batch = sample_minibatch(X_valid, y_valid, b, batch_size, history_length)
             valid_cost[epoch] += agent.sess.run(agent.cost, feed_dict={agent.x_input:X_valid_batch, agent.y_label:y_valid_batch})
         train_cost[epoch] = train_cost[epoch] / total_batch_num
         valid_cost[epoch] = valid_cost[epoch] / total_batch_num_valid
@@ -200,7 +200,7 @@ if __name__ == "__main__":
 
     # read data    
     X_train, y_train, X_valid, y_valid = read_data("./data")
-    history_length = 5
+    history_length = 1
     # preprocess data
     X_train, y_train, X_valid, y_valid = preprocessing(X_train, y_train, X_valid, y_valid, history_length)
     # train model (you can change the parameters!)

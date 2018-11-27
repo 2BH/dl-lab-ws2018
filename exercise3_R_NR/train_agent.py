@@ -54,7 +54,7 @@ def id_to_action(labels_id):
     labels_action[labels_id==RIGHT] = [1.0, 0.0, 0.0]
     labels_action[labels_id==STRAIGHT] = [0.0, 0.0, 0.0]
     labels_action[labels_id==ACCELERATE] = [0.0, 1.0, 0.0]
-    labels_action[labels_id==BRAKE] = [0.0, 0.0, 0.8]
+    labels_action[labels_id==BRAKE] = [0.0, 0.0, 0.2]
     return labels_action
 
 def uniform_sampling(X_train, y_train_id_n, num_samples):
@@ -200,7 +200,7 @@ if __name__ == "__main__":
 
     # read data    
     X_train, y_train, X_valid, y_valid = read_data("./data")
-    history_length = 5
+    history_length = 1
     # preprocess data
     X_train, y_train, X_valid, y_valid = preprocessing(X_train, y_train, X_valid, y_valid, history_length)
     # train model (you can change the parameters!)

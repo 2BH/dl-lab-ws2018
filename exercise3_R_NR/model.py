@@ -18,7 +18,7 @@ class Model:
         conv2 = tf.nn.conv2d(conv1_a, self.W_conv2, strides=[1, 2, 2, 1], padding='VALID')
         conv2_a = tf.nn.relu(conv2)
         # third layer + relu:
-        self.W_conv3 = tf.get_variable("W_conv3", [3, 3, 64, 32], initializer=tf.contrib.layers.xavier_initializer())
+        self.W_conv3 = tf.get_variable("W_conv3", [3, 3, 64, 64], initializer=tf.contrib.layers.xavier_initializer())
         conv3 = tf.nn.conv2d(conv2_a, self.W_conv3, strides=[1, 2, 2, 1], padding='VALID')
         conv3_a = tf.nn.relu(conv3)
         # forth layer + relu:
@@ -32,7 +32,7 @@ class Model:
         fc1_drop = tf.nn.dropout(fc1, 0.7)
         # second dense layer + relu:
         fc2 = tf.contrib.layers.fully_connected(fc1_drop, 400, activation_fn=tf.nn.relu)
-        fc2_drop = tf.nn.dropout(z5, 0.7)
+        fc2_drop = tf.nn.dropout(fc2, 0.7)
         # third dense layer + relu 
         fc3 = tf.contrib.layers.fully_connected(fc2_drop, 50, activation_fn=tf.nn.relu)
         # output layer:
