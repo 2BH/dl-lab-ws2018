@@ -99,7 +99,7 @@ def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
     X_train = rgb2gray(X_train)
     X_valid = rgb2gray(X_valid)
     # history:
-    
+    n = X_train.shape[0]
     # X_train_history = np.zeros((X_train.shape[0]-history_length+1, history_length, X_train.shape[1], X_train.shape[2]))
     # for i in range(X_train_history.shape[0]):
     #     X_train_history[i] = X_train[i:i+history_length,:,:]
@@ -112,12 +112,12 @@ def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
     
     # y_valid_history = y_valid[history_length-1:]
     # discretize actions
-    y_train_id = np.zeros(y_train.shape[0]-history_length+1)
+    y_train_id = np.zeros(n)
     # y_valid_id = np.zeros(y_valid.shape[0]-history_length+1)
     
     # data augmentation
-    for i in range(y_train.shape[0]-history_length+1):
-        y_train_id[i] = action_to_id(y_train[i+history_length-1])
+    for i in range(n):
+        y_train_id[i] = action_to_id(y_train[i])
  
     # X_train_n, y_train_id_n = data_augmentation(X_train, y_train_id)
     X_train_sampled, y_train_id_sampled = uniform_sampling(X_train, y_train_id, num_samples=12000)
@@ -207,5 +207,5 @@ if __name__ == "__main__":
     # preprocess data
     X_train, y_train, X_valid, y_valid = preprocessing(X_train, y_train, X_valid, y_valid, history_length)
     # train model (you can change the parameters!)
-    # train_model(X_train, y_train, X_valid, y_valid, history_length=history_length, epochs=20, batch_size=64, lr=0.0004)
+    train_model(X_train, y_train, X_valid, y_valid, history_length=history_length, epochs=20, batch_size=64, lr=0.0004)
  
