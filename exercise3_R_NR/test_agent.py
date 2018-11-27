@@ -11,19 +11,21 @@ from utils import *
 
 
 def run_episode(env, agent, rendering=True):
-    
+    history_length = 5
     episode_reward = 0
     step = 0
-
     state = env.reset()
+    state_history = np.zeros((*state.shape, history_length))   
     while True:
         
         # TODO: preprocess the state in the same way than in in your preprocessing in train_agent.py
         state = rgb2gray(state)
-        state = state.reshape(1, 96, 96, 1)
+        state_history[:,:,:,0:history_length] = state_history[:,:,:,1:]
+        state_history[:,:,:,-1] = state
+        # state = state.reshape(1, 96, 96, 1)
         # TODO: get the action from your agent! If you use discretized actions you need to transform them to continuous
         # actions again. a needs to have a shape like np.array([0.0, 0.0, 0.0])
-        a = agent.sess.run(agent.output, feed_dict={agent.x_input:state})[0]
+        a = agent.sess.run(agent.output, feed_dict={agent.x_input:state_history})[0]
         next_state, r, done, info = env.step(a)   
         episode_reward += r       
         state = next_state
