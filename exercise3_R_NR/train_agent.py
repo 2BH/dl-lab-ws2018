@@ -117,7 +117,7 @@ def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
     for i in range(y_train.shape[0]):
         y_train_id[i] = action_to_id(y_train[i])
 
-    X_train_n, y_train_id_n = data_augmentation(X_train_history, y_train_id)
+    X_train_n, y_train_id_n = data_augmentation(X_train, y_train_id)
     X_train_sampled, y_train_id_sampled = uniform_sampling(X_train_n, y_train_id_n, num_samples=12000)
 
     y_train_action = id_to_action(y_train_id_sampled)
@@ -125,7 +125,7 @@ def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
     # At first you should only use the current image as input to your network to learn the next action. Then the input states
     # have shape (96, 96,1). Later, add a history of the last N images to your state so that a state has shape (96, 96, N).
     
-    return X_train_sampled, y_train_action, X_valid_history, y_valid
+    return X_train_sampled, y_train_action, X_valid, y_valid
 
 
 def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, history_length=1, model_dir="./models", tensorboard_dir="./tensorboard"):
@@ -182,7 +182,7 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, hist
 
         # validation cost
         for b in range(total_batch_num_valid):
-            X_valid_batch, y_valid_batch = sample_minibatch(X_train, y_train, b, batch_size, history_length)
+            X_valid_batch, y_valid_batch = sample_minibatch(X_valid, y_valid, b, batch_size, history_length)
             valid_cost[epoch] += agent.sess.run(agent.cost, feed_dict={agent.x_input:X_valid_batch, agent.y_label:y_valid_batch})
         train_cost[epoch] = train_cost[epoch] / total_batch_num
         valid_cost[epoch] = valid_cost[epoch] / total_batch_num_valid
