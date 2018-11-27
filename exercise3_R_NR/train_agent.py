@@ -104,7 +104,7 @@ def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
     for i in range(y_train.shape[0]):
         y_train_id[i] = action_to_id(y_train[i])
 
-    X_train_n, y_train_id_n = data_augmentation(X_train, y_train_id)
+    X_train_n, y_train_id_n = data_augmentation(X_train_history, y_train_id)
     X_train_sampled, y_train_id_sampled = uniform_sampling(X_train_n, y_train_id_n, num_samples=12000)
 
     y_train_action = id_to_action(y_train_id_sampled)
