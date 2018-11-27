@@ -26,17 +26,30 @@ class Model:
         conv4 = tf.nn.conv2d(conv3_a, self.W_conv4, strides=[1, 2, 2, 1], padding='VALID')
         conv4_a = tf.nn.relu(conv4)
 
+
         flatten = tf.contrib.layers.flatten(conv4_a)
         # first dense layer + relu + dropout
         fc1 = tf.contrib.layers.fully_connected(flatten, 400, activation_fn=tf.nn.relu)
-        fc1_drop = tf.nn.dropout(fc1, 0.7)
+        fc1_drop = tf.nn.dropout(fc1, 0.8)
         # second dense layer + relu:
         fc2 = tf.contrib.layers.fully_connected(fc1_drop, 400, activation_fn=tf.nn.relu)
-        fc2_drop = tf.nn.dropout(fc2, 0.7)
+        fc2_drop = tf.nn.dropout(fc2, 0.8)
         # third dense layer + relu 
         fc3 = tf.contrib.layers.fully_connected(fc2_drop, 50, activation_fn=tf.nn.relu)
+
+        # LSTM layer
+        a_lstm = tf.nn.rnn_cell.LSTMCell(num_units=256)
+        a_lstm = tf.nn.rnn_cell.DropoutWrapper(a_lstm, output_keep_prob=0.8)
+        a_lstm = tf.nn.rnn_cell.MultiRNNCell(cells=[a_lstm])
+
+        a_init_state = a_lstm.zero_state(batch_size=64, dtype=tf.float32)
+        lstm_in = tf.expand_dims(fc3, axis=1)
+
+        a_outputs, a_final_state = tf.nn.dynamic_rnn(cell=a_lstm, inputs=lstm_in, initial_state=a_init_state)
+        a_cell_out = tf.reshape(a_outputs, [-1, 256], name='flatten_lstm_outputs')
+
         # output layer:
-        self.output = tf.contrib.layers.fully_connected(fc3, 3, activation_fn=None)
+        self.output = tf.contrib.layers.fully_connected(a_cell_out, 3, activation_fn=None)
         # TODO: Loss and optimizer
         self.cost = tf.reduce_mean(tf.losses.mean_squared_error(predictions=self.output, labels=self.y_label))
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.cost)
