@@ -33,6 +33,30 @@ def read_data(datasets_dir="./data", frac = 0.1):
     return X_train, y_train, X_valid, y_valid
 
 
+def data_augmentation(X_train, y_train_id):
+    # left:
+    left_indices = (y_train_id == LEFT)
+    # right:
+    right_indices = (y_train_id == RIGHT)
+    X_new_left_data = np.flip(X_train[left_indices], axis=2)
+    X_new_right_data = np.flip(X_train[right_indices], axis=2)
+    y_new_left_data = np.zeros((X_new_left_data.shape[0])) + RIGHT
+    y_new_right_data = np.zeros((X_new_right_data.shape[0])) + LEFT
+    X_train_n = np.concatenate((X_train, X_new_left_data, X_new_right_data), axis=0)
+    y_train_id_n = np.concatenate((y_train_id, y_new_left_data, y_new_right_data), axis=0)
+    
+    return X_train_n, y_train_id_n
+
+def id_to_action(labels_id):
+    classes = 3
+    labels_action = np.zeros((labels_id.shape[0], classes))
+    labels_action[labels_id==LEFT] = [-1.0, 0.0, 0.0]
+    labels_action[labels_id==RIGHT] = [1.0, 0.0, 0.0]
+    labels_action[labels_id==STRAIGHT] = [0.0, 0.0, 0.0]
+    labels_action[labels_id==ACCELERATE] = [0.0, 1.0, 0.0]
+    labels_action[labels_id==BRAKE] = [0.0, 0.0, 0.8]
+    return labels_action
+
 def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
 
     # TODO: preprocess your data here.
@@ -54,24 +78,22 @@ def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
     X_valid_history = X_valid_history.transpose(0,2,3,1)
     
     # discretize actions
-    # y_train_id = np.zeros(y_train.shape[0])
-    # y_valid_id = np.zeros(y_valid.shape[0])
+    y_train_id = np.zeros(y_train.shape[0])
+    y_valid_id = np.zeros(y_valid.shape[0])
     
-    """   
+    # data augmentation
     for i in range(y_train.shape[0]):
         y_train_id[i] = action_to_id(y_train[i])
-    for j in range(y_valid.shape[0]):
-        y_valid_id[j] = int(action_to_id(y_valid[j]))
-    y_train_id = y_train_id.astype(int)
-    y_valid_id = y_valid_id.astype(int)
-    y_train = one_hot(y_train_id)
-    y_valid = one_hot(y_valid_id)
-    """
+
+    X_train_n, y_train_id_n = data_augmentation(X_train, y_train_id)
+    X_train_sampled, y_train_id_sampled = uniform_sampling(X_train_n, y_train_id_n, num_samples=12000)
+
+    y_train_action = id_to_action(y_train_id_sampled)
     # History:
     # At first you should only use the current image as input to your network to learn the next action. Then the input states
     # have shape (96, 96,1). Later, add a history of the last N images to your state so that a state has shape (96, 96, N).
     
-    return X_train_history, y_train, X_valid_history, y_valid
+    return X_train_sampled, y_train_action, X_valid_history, y_valid
 
 
 def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, history_length=1, model_dir="./models", tensorboard_dir="./tensorboard"):
