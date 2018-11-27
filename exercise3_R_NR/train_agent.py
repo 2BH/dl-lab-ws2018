@@ -203,9 +203,9 @@ if __name__ == "__main__":
 
     # read data    
     X_train, y_train, X_valid, y_valid = read_data("./data")
-    history_length = 5
+    history_length = 3
     # preprocess data
     X_train, y_train, X_valid, y_valid = preprocessing(X_train, y_train, X_valid, y_valid, history_length)
     # train model (you can change the parameters!)
-    train_model(X_train, y_train, X_valid, y_valid, history_length=history_length, epochs=20, batch_size=64, lr=0.0004)
+    train_model(X_train, y_train, X_valid, y_valid, history_length=history_length, epochs=10, batch_size=64, lr=0.0004)
  
