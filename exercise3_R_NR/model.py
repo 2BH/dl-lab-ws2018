@@ -11,28 +11,32 @@ class Model:
 
         # first layers + relu
         self.W_conv1 = tf.get_variable("W_conv1", [8, 8, history_length, 64], initializer=tf.contrib.layers.xavier_initializer())
-        z1 = tf.nn.conv2d(self.x_input, self.W_conv1, strides=[1, 2, 2, 1], padding='VALID')
-        a1 = tf.nn.relu(z1)
+        conv1 = tf.nn.conv2d(self.x_input, self.W_conv1, strides=[1, 2, 2, 1], padding='VALID')
+        conv1_a = tf.nn.relu(conv1)
         # second layer + relu: 
         self.W_conv2 = tf.get_variable("W_conv2", [4, 4, 64, 64], initializer=tf.contrib.layers.xavier_initializer())
-        z2 = tf.nn.conv2d(a1, self.W_conv2, strides=[1, 2, 2, 1], padding='VALID')
-        a2 = tf.nn.relu(z2)
+        conv2 = tf.nn.conv2d(conv1_a, self.W_conv2, strides=[1, 2, 2, 1], padding='VALID')
+        conv2_a = tf.nn.relu(conv2)
         # third layer + relu:
         self.W_conv3 = tf.get_variable("W_conv3", [3, 3, 64, 32], initializer=tf.contrib.layers.xavier_initializer())
-        z3 = tf.nn.conv2d(a2, self.W_conv3, strides=[1, 2, 2, 1], padding='VALID')
-        a3 = tf.nn.relu(z3)
-        
-        flatten = tf.contrib.layers.flatten(a3)
+        conv3 = tf.nn.conv2d(conv2_a, self.W_conv3, strides=[1, 2, 2, 1], padding='VALID')
+        conv3_a = tf.nn.relu(conv3)
+        # forth layer + relu:
+        self.W_conv4 = tf.get_variable("W_conv4", [3, 3, 64, 32], initializer=tf.contrib.layers.xavier_initializer()) 
+        conv4 = tf.nn.conv2d(conv3_a, self.W_conv4, strides=[1, 2, 2, 1], padding='VALID')
+        conv4_a = tf.nn.relu(conv4)
+
+        flatten = tf.contrib.layers.flatten(conv4_a)
         # first dense layer + relu + dropout
-        z4 = tf.contrib.layers.fully_connected(flatten, 400, activation_fn=tf.nn.relu)
-        z4_drop = tf.nn.dropout(z4, 0.7)
+        fc1 = tf.contrib.layers.fully_connected(flatten, 400, activation_fn=tf.nn.relu)
+        fc1_drop = tf.nn.dropout(fc1, 0.7)
         # second dense layer + relu:
-        z5 = tf.contrib.layers.fully_connected(z4_drop, 400, activation_fn=tf.nn.relu)
-        z5_drop = tf.nn.dropout(z5, 0.7)
+        fc2 = tf.contrib.layers.fully_connected(fc1_drop, 400, activation_fn=tf.nn.relu)
+        fc2_drop = tf.nn.dropout(z5, 0.7)
         # third dense layer + relu 
-        z6 = tf.contrib.layers.fully_connected(z5_drop, 50, activation_fn=tf.nn.relu)
+        fc3 = tf.contrib.layers.fully_connected(fc2_drop, 50, activation_fn=tf.nn.relu)
         # output layer:
-        self.output = tf.contrib.layers.fully_connected(z6, 3, activation_fn=None)
+        self.output = tf.contrib.layers.fully_connected(fc3, 3, activation_fn=None)
         # TODO: Loss and optimizer
         self.cost = tf.reduce_mean(tf.losses.mean_squared_error(predictions=self.output, labels=self.y_label))
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.cost)
