@@ -203,7 +203,7 @@ if __name__ == "__main__":
 
     # read data    
     X_train, y_train, X_valid, y_valid = read_data("./data")
-    history_length = 3
+    history_length = 1
     # preprocess data
     X_train, y_train, X_valid, y_valid = preprocessing(X_train, y_train, X_valid, y_valid, history_length)
     # train model (you can change the parameters!)
