@@ -5,6 +5,10 @@ RIGHT = 2
 STRAIGHT = 0
 ACCELERATE =3
 BRAKE = 4
+LEFT_BRAKE = 5
+RIGHT_BRAKE = 6
+LEFT_ACCELERATE = 7
+RIGHT_ACCELERATE = 8
 
 def one_hot(labels):
     """
@@ -32,9 +36,13 @@ def action_to_id(a):
     this method discretizes the actions.
     Important: this method only works if you recorded data pressing only one key at a time!
     """
-    if all(a == [-1.0, 0.0, 0.0]): return LEFT               # LEFT: 1
-    elif all(a == [1.0, 0.0, 0.0]): return RIGHT             # RIGHT: 2
-    elif all(a == [0.0, 1.0, 0.0]): return ACCELERATE        # ACCELERATE: 3
-    elif all(a == [0.0, 0.0, 0.2]): return BRAKE             # BRAKE: 4
-    else:       
+    if np.allclose(a, [-1.0, 0.0, 0.0]): return LEFT               # LEFT: 1
+    elif np.allclose(a, [1.0, 0.0, 0.0]): return RIGHT             # RIGHT: 2
+    elif np.allclose(a, [0.0, 1.0, 0.0]): return ACCELERATE        # ACCELERATE: 3
+    elif np.allclose(a, [0.0, 0.0, 0.2]): return BRAKE             # BRAKE: 4
+    elif np.allclose(a, [-1.0, 0.0, 0.2]): return LEFT_BRAKE        # LEFT_BRAKE: 5
+    elif np.allclose(a, [1.0, 0.0, 0.2]): return RIGHT_BRAKE       # RIGHT_BRAKE: 6
+    elif np.allclose(a, [-1.0, 1.0, 0.0]): return LEFT_ACCELERATE   # LEFT_ACCELERATE: 7
+    elif np.allclose(a, [1.0, 1.0, 0.0]): return RIGHT_ACCELERATE  # RIGHT_ACCELERATE: 8
+    else:
         return STRAIGHT                                      # STRAIGHT = 0
