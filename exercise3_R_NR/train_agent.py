@@ -120,7 +120,7 @@ def preprocessing(X_train, y_train, X_valid, y_valid, history_length=1):
         y_train_id[i] = action_to_id(y_train[i])
  
     # X_train_n, y_train_id_n = data_augmentation(X_train, y_train_id)
-    X_train_sampled, y_train_id_sampled = uniform_sampling(X_train, y_train_id, num_samples=12000)
+    X_train_sampled, y_train_id_sampled = uniform_sampling(X_train, y_train_id, num_samples=20000)
 
     y_train_action = id_to_action(y_train_id_sampled)
     # History:
@@ -200,9 +200,11 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, hist
     agent.sess.close()
 
 if __name__ == "__main__":
-
+    num_samples = 30000
     # read data    
     X_train, y_train, X_valid, y_valid = read_data("./data")
+    X_train = X_train[:num_samples]
+    y_train = y_train[:num_samples]
     history_length = 1
     # preprocess data
     X_train, y_train, X_valid, y_valid = preprocessing(X_train, y_train, X_valid, y_valid, history_length)
