@@ -84,7 +84,7 @@ def uniform_sampling(X_train, y_train_id_n, num_samples):
     right_acce_indices = y_train_id_n == RIGHT_ACCELERATE
     weights[right_acce_indices] = n / np.sum(right_acce_indices)
     weights = weights / np.sum(weights)
-    samples_indices = np.random.choice(np.arange(n), num_samples, p = weights)
+    samples_indices = np.random.choice(np.arange(n), num_samples,replace=False,  p = weights)
     
     return X_train[samples_indices], y_train_id_n[samples_indices]
 

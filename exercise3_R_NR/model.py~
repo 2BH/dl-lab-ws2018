@@ -10,11 +10,11 @@ class Model:
         self.y_label = tf.placeholder(dtype=tf.float32, shape = [None, 3], name = "y_label")
 
         # first layers + relu
-        self.W_conv1 = tf.get_variable("W_conv1", [8, 8, history_length, 64], initializer=tf.contrib.layers.xavier_initializer())
+        self.W_conv1 = tf.get_variable("W_conv1", [8, 8, history_length, 128], initializer=tf.contrib.layers.xavier_initializer())
         conv1 = tf.nn.conv2d(self.x_input, self.W_conv1, strides=[1, 2, 2, 1], padding='VALID')
         conv1_a = tf.nn.relu(conv1)
         # second layer + relu: 
-        self.W_conv2 = tf.get_variable("W_conv2", [4, 4, 64, 64], initializer=tf.contrib.layers.xavier_initializer())
+        self.W_conv2 = tf.get_variable("W_conv2", [4, 4, 128, 64], initializer=tf.contrib.layers.xavier_initializer())
         conv2 = tf.nn.conv2d(conv1_a, self.W_conv2, strides=[1, 2, 2, 1], padding='VALID')
         conv2_a = tf.nn.relu(conv2)
         # third layer + relu:
