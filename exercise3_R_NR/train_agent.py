@@ -96,6 +96,7 @@ def sample_minibatch(X, y, batch_index, history_length=1):
     for i in range(history_length):
         X_batch[:,:,:,i] = X[batch_index+i]
     y_batch = y[batch_index+history_length-1]
+
     return X_batch, y_batch
 
 
@@ -147,7 +148,7 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, hist
     # 2. compute training/ validation accuracy and loss for the batch and visualize them with tensorboard. You can watch the progress of
     #    your training in your web browser
     offset = history_length - 1
-    num_samples = 12000
+    num_samples = 20000
     # training loop
     train_cost = np.zeros((epochs))
     # train_accuracy = np.zeros((epochs))
@@ -157,7 +158,7 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, hist
         # index = np.random.permutation(X_train.shape[0])
         # X_train, y_train = X_train[index], y_train[index]
         # print(X_train.shape)
-        index = uniform_sampling(X_train[offset:], y_train[offset:])
+        index = uniform_sampling(X_train[offset:], y_train[offset:], num_samples)
         total_batch_num = (num_samples - history_length + 1) // batch_size;
         total_batch_num_valid = (X_valid.shape[0] - history_length + 1)// batch_size;
         
@@ -165,6 +166,7 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, hist
             # select the batch data
             batch_index = index[b*batch_size:(b+1)*batch_size]
             X_batch, y_batch = sample_minibatch(X_train, y_train, batch_index, history_length)
+            y_batch = id_to_action(y_batch)
             # compute the cost
             _ , temp_cost = agent.sess.run([agent.optimizer, agent.cost], feed_dict={agent.x_input:X_batch, agent.y_label:y_batch})
 
@@ -172,11 +174,12 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, hist
         for b in range(total_batch_num):
             batch_index = index[b*batch_size:(b+1)*batch_size]
             X_batch, y_batch = sample_minibatch(X_train, y_train, batch_index, history_length)
+            y_batch = id_to_action(y_batch)
             train_cost[epoch] += agent.sess.run(agent.cost, feed_dict={agent.x_input: X_batch, agent.y_label: y_batch})
 
         # validation cost
         for b in range(total_batch_num_valid):
-            batch_index = np.arange(b*batch_size:(b+1)*batch_size)
+            batch_index = np.arange(b*batch_size,(b+1)*batch_size)
             X_valid_batch, y_valid_batch = sample_minibatch(X_valid, y_valid, batch_index, history_length)
             valid_cost[epoch] += agent.sess.run(agent.cost, feed_dict={agent.x_input:X_valid_batch, agent.y_label:y_valid_batch})
         train_cost[epoch] = train_cost[epoch] / total_batch_num
@@ -195,9 +198,10 @@ if __name__ == "__main__":
     used_num_samples = 30000
     # read data    
     X_train, y_train, X_valid, y_valid = read_data("./data")
-    X_train = X_train[:used_num_samples]
-    y_train = y_train[:used_num_samples]
-    history_length = 1
+    start = X_train.shape[0] - used_num_samples
+    X_train = X_train[start:]
+    y_train = y_train[start:]
+    history_length = 3
     # preprocess data
     X_train, y_train, X_valid, y_valid = preprocessing(X_train, y_train, X_valid, y_valid, history_length)
     # train model (you can change the parameters!)

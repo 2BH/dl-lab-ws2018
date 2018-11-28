@@ -9,8 +9,8 @@ import json
 from model import Model
 from utils import *
 
-history_length = 1
-def run_episode(env, agent, rendering=True):
+history_length = 3
+def run_episode(env, agent, rendering=True, max_timesteps=1000 ):
 
     episode_reward = 0
     step = 0
@@ -34,7 +34,7 @@ def run_episode(env, agent, rendering=True):
         if rendering:
             env.render()
 
-        if done: 
+        if done or step > max_timesteps: 
             break
 
     return episode_reward
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     rendering = True                      # set rendering=False if you want to evaluate faster
     
-    n_test_episodes = 10                  # number of episodes to test
+    n_test_episodes = 15                  # number of episodes to test
 
     # TODO: load agent
     agent = Model(history_length=history_length)
