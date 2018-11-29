@@ -168,20 +168,20 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs, batch_size, lr, hist
             X_batch, y_batch = sample_minibatch(X_train, y_train, batch_index, history_length)
             y_batch = id_to_action(y_batch)
             # compute the cost
-            _ , temp_cost = agent.sess.run([agent.optimizer, agent.cost], feed_dict={agent.x_input:X_batch, agent.y_label:y_batch})
+            _ , temp_cost = agent.sess.run([agent.optimizer, agent.cost], feed_dict={agent.x_input:X_batch, agent.y_label:y_batch, agent.batch_size:batch_size})
 
         # training cost
         for b in range(total_batch_num):
             batch_index = index[b*batch_size:(b+1)*batch_size]
             X_batch, y_batch = sample_minibatch(X_train, y_train, batch_index, history_length)
             y_batch = id_to_action(y_batch)
-            train_cost[epoch] += agent.sess.run(agent.cost, feed_dict={agent.x_input: X_batch, agent.y_label: y_batch})
+            train_cost[epoch] += agent.sess.run(agent.cost, feed_dict={agent.x_input: X_batch, agent.y_label: y_batch, agent.batch_size:batch_size})
 
         # validation cost
         for b in range(total_batch_num_valid):
             batch_index = np.arange(b*batch_size,(b+1)*batch_size)
             X_valid_batch, y_valid_batch = sample_minibatch(X_valid, y_valid, batch_index, history_length)
-            valid_cost[epoch] += agent.sess.run(agent.cost, feed_dict={agent.x_input:X_valid_batch, agent.y_label:y_valid_batch})
+            valid_cost[epoch] += agent.sess.run(agent.cost, feed_dict={agent.x_input:X_valid_batch, agent.y_label:y_valid_batch, agent.batch_size:batch_size})
         train_cost[epoch] = train_cost[epoch] / total_batch_num
         valid_cost[epoch] = valid_cost[epoch] / total_batch_num_valid
         print("[%d/%d]: train_cost: %.4f, valid_cost: %.4f" %(epoch+1, epochs, train_cost[epoch], valid_cost[epoch]))

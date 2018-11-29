@@ -8,7 +8,7 @@ class Model:
         # variable for input and labels
         self.x_input = tf.placeholder(dtype=tf.float32, shape = [None, 96, 96, history_length], name = "x_input")
         self.y_label = tf.placeholder(dtype=tf.float32, shape = [None, 3], name = "y_label")
-        self.batch_size = batch_size
+        self.batch_size = tf.placeholder(tf.int32)
         # first layers + relu
         self.W_conv1 = tf.get_variable("W_conv1", [8, 8, history_length, 64], initializer=tf.contrib.layers.xavier_initializer())
         conv1 = tf.nn.conv2d(self.x_input, self.W_conv1, strides=[1, 2, 2, 1], padding='VALID')
