@@ -8,7 +8,8 @@ class Model:
         # variable for input and labels
         self.x_input = tf.placeholder(dtype=tf.float32, shape = [None, 96, 96, history_length], name = "x_input")
         self.y_label = tf.placeholder(dtype=tf.float32, shape = [None, 3], name = "y_label")
-        self.batch_size = tf.placeholder(tf.int32)
+        
+        batch_size = tf.shape(self.x_input)[0]
         # first layers + relu
         self.W_conv1 = tf.get_variable("W_conv1", [8, 8, history_length, 64], initializer=tf.contrib.layers.xavier_initializer())
         conv1 = tf.nn.conv2d(self.x_input, self.W_conv1, strides=[1, 2, 2, 1], padding='VALID')
@@ -42,7 +43,7 @@ class Model:
         a_lstm = tf.nn.rnn_cell.DropoutWrapper(a_lstm, output_keep_prob=0.8)
         a_lstm = tf.nn.rnn_cell.MultiRNNCell(cells=[a_lstm])
 
-        a_init_state = a_lstm.zero_state(batch_size=self.batch_size, dtype=tf.float32)
+        a_init_state = a_lstm.zero_state(batch_size=batch_size, dtype=tf.float32)
         lstm_in = tf.expand_dims(fc3, axis=1)
 
         a_outputs, a_final_state = tf.nn.dynamic_rnn(cell=a_lstm, inputs=lstm_in, initial_state=a_init_state)
