@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 class Model:
-    def __init__(self, history_length=1, learning_rate=3e-4, batch_size=1):
+    def __init__(self, history_length=1, learning_rate=3e-4, batch_size=1, num_filters=64):
         
         # TODO: Define network
         self.learning_rate = learning_rate 
@@ -11,19 +11,19 @@ class Model:
         
         batch_size = tf.shape(self.x_input)[0]
         # first layers + relu
-        self.W_conv1 = tf.get_variable("W_conv1", [8, 8, history_length, 64], initializer=tf.contrib.layers.xavier_initializer())
+        self.W_conv1 = tf.get_variable("W_conv1", [8, 8, history_length, num_filters], initializer=tf.contrib.layers.xavier_initializer())
         conv1 = tf.nn.conv2d(self.x_input, self.W_conv1, strides=[1, 2, 2, 1], padding='VALID')
         conv1_a = tf.nn.relu(conv1)
         # second layer + relu: 
-        self.W_conv2 = tf.get_variable("W_conv2", [4, 4, 64, 64], initializer=tf.contrib.layers.xavier_initializer())
+        self.W_conv2 = tf.get_variable("W_conv2", [4, 4, num_filters, num_filters], initializer=tf.contrib.layers.xavier_initializer())
         conv2 = tf.nn.conv2d(conv1_a, self.W_conv2, strides=[1, 2, 2, 1], padding='VALID')
         conv2_a = tf.nn.relu(conv2)
         # third layer + relu:
-        self.W_conv3 = tf.get_variable("W_conv3", [3, 3, 64, 64], initializer=tf.contrib.layers.xavier_initializer())
+        self.W_conv3 = tf.get_variable("W_conv3", [3, 3, num_filters, num_filters], initializer=tf.contrib.layers.xavier_initializer())
         conv3 = tf.nn.conv2d(conv2_a, self.W_conv3, strides=[1, 2, 2, 1], padding='VALID')
         conv3_a = tf.nn.relu(conv3)
         # forth layer + relu:
-        self.W_conv4 = tf.get_variable("W_conv4", [3, 3, 64, 32], initializer=tf.contrib.layers.xavier_initializer()) 
+        self.W_conv4 = tf.get_variable("W_conv4", [3, 3, num_filters, 32], initializer=tf.contrib.layers.xavier_initializer()) 
         conv4 = tf.nn.conv2d(conv3_a, self.W_conv4, strides=[1, 2, 2, 1], padding='VALID')
         conv4_a = tf.nn.relu(conv4)
 
