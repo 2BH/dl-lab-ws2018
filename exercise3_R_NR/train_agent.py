@@ -180,21 +180,35 @@ def train_model(X_train, y_train, X_valid, y_valid, epochs=10, batch_size=64, lr
       
     # TODO: save your agent
     agent.save(os.path.join(model_dir, "agent.ckpt"))
-    print(model_dir)
     print("Model saved in file: %s" % model_dir)
     agent.sess.close()
     return train_cost, valid_cost
 
 if __name__ == "__main__":
+    # best hypeparameters with lstm:
+    #  {'num_filters': 41,
+    # 'learning_rate':0.0001339095972726421,
+    # 'batch_size': 28,
+    # 'history_length': 2,
+    # 'num_uniform_sample': 16000}
+
+    # best hyperparameters without lstm:
+    # num_filters : 74
+    # batch_size: 58
+    # history_length: 1
+    # num_uniform_sample: 16000
+    # learning_rate: 0.00032224967019634816
+
     # hyperparameters
+    plot = True
     used_num_samples = 30000
-    history_length = 5
+    history_length = 2
     epochs = 10
-    batch_size = 64
-    learning_rate = 0.0003
-    num_filters = 64
+    batch_size = 28
+    learning_rate = 0.0001339095972726421
+    num_filters = 41
     # each epoch use how many samples
-    num_uniform_sample = 15000
+    num_uniform_sample = 16000
     # read data
     X_train, y_train, X_valid, y_valid = read_data("./data")
     start = X_train.shape[0] - used_num_samples
@@ -204,5 +218,15 @@ if __name__ == "__main__":
     # preprocess data
     X_train, y_train, X_valid, y_valid = preprocessing(X_train, y_train, X_valid, y_valid)
     # train model (you can change the parameters!)
-    train_model(X_train, y_train, X_valid, y_valid, history_length=history_length, epochs=epochs, batch_size=batch_size, lr=learning_rate, num_uniform_sample=num_uniform_sample, num_filters=num_filters)
+    train_cost, valid_cost = train_model(X_train, y_train, X_valid, y_valid, history_length=history_length, epochs=epochs, batch_size=batch_size, lr=learning_rate, num_uniform_sample=num_uniform_sample, num_filters=num_filters)
+    
+    if plot == True:
+        plt.plot(np.arange(epochs)+1, train_cost, label="training cost")
+        plt.plot(np.arange(epochs)+1, valid_cost, label="validation cost")
+        plt.legend()
+        plt.title("train/valid cost wrt training epochs")
+        plt.xlabel("# epoch")
+        plt.ylabel("cost")
+        plt.show()
+        plt.savefig("./train-valid-cost.png")
  

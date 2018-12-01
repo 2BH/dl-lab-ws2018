@@ -9,7 +9,9 @@ import json
 from model import Model
 from utils import *
 
-history_length = 5
+history_length = 2
+batch_size = 28
+num_filters = 41
 def run_episode(env, agent, rendering=True, max_timesteps=1000 ):
 
     episode_reward = 0
@@ -47,7 +49,7 @@ if __name__ == "__main__":
     n_test_episodes = 15                  # number of episodes to test
 
     # TODO: load agent
-    agent = Model(history_length=history_length)
+    agent = Model(history_length=history_length, batch_size = batch_size, num_filters=num_filters)
     agent.load("models/agent.ckpt")
 
     env = gym.make('CarRacing-v0').unwrapped

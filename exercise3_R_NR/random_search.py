@@ -48,7 +48,7 @@ class MyWorker(Worker):
         
 
         # TODO: train and validate your convolutional neural networks here
-        train_cost, valid_cost = train_model(self.x_train, self.y_train, self.x_valid, self.y_valid, epochs, lr, num_filters, batch_size, filter_size, history_length)
+        train_cost, valid_cost = train_model(self.x_train, self.y_train, self.x_valid, self.y_valid, epochs, batch_size, lr, history_length, num_uniform_sample, num_filters)
         validation_error = valid_cost[-1]
         # TODO: We minimize so make sure you return the validation error here
         return ({
@@ -139,5 +139,5 @@ batch_size = id2config[incumbent]['config']["batch_size"]
 # filter_size = id2config[incumbent]['config']["filter_size"]
 history_length = id2config[incumbent]['config']["history_length"]
 num_uniform_sample = id2config[incumbent]['config']["num_uniform_sample"]
-train_cost, valid_cost = train_and_validate(w.x_train, w.y_train, w.x_valid, w.y_valid, epochs, batch_size, lr, history_length, num_uniform_sample, num_filters)
+train_cost, valid_cost = train_model(w.x_train, w.y_train, w.x_valid, w.y_valid, epochs, batch_size, lr, history_length, num_uniform_sample, num_filters)
 print("validation cost of the best model is: %.4f" %valid_cost[-1])
