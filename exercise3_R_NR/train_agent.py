@@ -202,11 +202,11 @@ if __name__ == "__main__":
     # hyperparameters
     plot = True
     used_num_samples = 30000
-    history_length = 2
+    history_length = 1
     epochs = 10
-    batch_size = 28
-    learning_rate = 0.0001339095972726421
-    num_filters = 41
+    batch_size = 58
+    learning_rate = 0.00032224967019634816
+    num_filters = 74
     # each epoch use how many samples
     num_uniform_sample = 16000
     # read data
