@@ -9,9 +9,9 @@ import json
 from model import Model
 from utils import *
 
-history_length = 1
-batch_size = 58
-num_filters = 74
+history_length = 2
+batch_size = 28
+num_filters = 41
 def run_episode(env, agent, rendering=True, max_timesteps=1000 ):
 
     episode_reward = 0
@@ -36,8 +36,8 @@ def run_episode(env, agent, rendering=True, max_timesteps=1000 ):
         if rendering:
             env.render()
 
-        if done or step > max_timesteps:
-        # if done:
+        # if done or step > max_timesteps:
+        if done:
             break
 
     return episode_reward
