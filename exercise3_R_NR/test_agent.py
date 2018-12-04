@@ -36,8 +36,8 @@ def run_episode(env, agent, rendering=True, max_timesteps=1000 ):
         if rendering:
             env.render()
 
-        # if done or step > max_timesteps:
-        if done:
+        if done or step > max_timesteps:
+        # if done:
             break
 
     return episode_reward
