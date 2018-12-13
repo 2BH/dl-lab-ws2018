@@ -16,7 +16,6 @@ def run_episode(env, agent, deterministic, do_training=True, rendering=False, ma
     
     stats = EpisodeStats()        # save statistics like episode reward or action usage
     state = env.reset()
-
     step = 0
     while True:
         
@@ -46,22 +45,26 @@ def train_online(env, agent, num_episodes, model_dir="./models_cartpole", tensor
  
     print("... train agent")
 
-    tensorboard = Evaluation(os.path.join(tensorboard_dir, "train"), ["episode_reward", "a_0", "a_1"])
+    tensorboard = Evaluation(os.path.join(tensorboard_dir, "train"), ["episode_reward", "valid_episode_reward", "a_0", "a_1"])
 
     # training
     for i in range(num_episodes):
         print("episode: ",i)
         stats = run_episode(env, agent, deterministic=False, do_training=True)
-        tensorboard.write_episode_data(i, eval_dict={  "episode_reward" : stats.episode_reward, 
-                                                                "a_0" : stats.get_action_usage(0),
-                                                                "a_1" : stats.get_action_usage(1)})
+
 
         # TODO: evaluate your agent once in a while for some episodes using run_episode(env, agent, deterministic=True, do_training=False) to 
         # check its performance with greedy actions only. You can also use tensorboard to plot the mean episode reward.
-        # ...
-       
         # store model every 100 episodes and in the end.
         if i % 100 == 0 or i >= (num_episodes - 1):
+            valid_reward = 0
+            for j in range(5):
+                valid_stats = run_episode(env, agent, deterministic=True, do_training=False)
+                valid_reward += valid_stats.episode_reward
+            tensorboard.write_episode_data(i, eval_dict={"episode_reward" : stats.episode_reward, 
+                                                         "valid_episode_reward" : valid_reward/5,
+                                                         "a_0" : stats.get_action_usage(0),
+                                                         "a_1" : stats.get_action_usage(1)})
             agent.saver.save(agent.sess, os.path.join(model_dir, "dqn_agent.ckpt"))
    
     tensorboard.close_session()
@@ -79,4 +82,9 @@ if __name__ == "__main__":
     # 1. init Q network and target network (see dqn/networks.py)
     # 2. init DQNAgent (see dqn/dqn_agent.py)
     # 3. train DQN agent with train_online(...)
- 
+    num_actions = 2
+    state_dim = 4
+    Q = NeuralNetwork(state_dim=state_dim, num_actions=num_actions)
+    Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions)
+    agent = DQNAgent(Q, Q_target, num_actions, discount_factor=0.6, batch_size=64, epsilon=0.05)
+    train_online(env, agent, 4000)

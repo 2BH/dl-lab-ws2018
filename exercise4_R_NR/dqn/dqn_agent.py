@@ -50,7 +50,16 @@ class DQNAgent:
         #              self.Q.update(...)
         #       2.3 call soft update for target network
         #              self.Q_target.update(...)
-   
+        self.replay_buffer.add_transition(state, action, next_state, reward, terminal)
+        batch_states, batch_actions, batch_next_states, batch_rewards, batch_dones = self.replay_buffer.next_batch(self.batch_size)
+        td_target = batch_rewards
+        td_target[np.logical_not(batch_dones)] += self.discount_factor * np.max(self.Q_target.predict(self.sess, batch_next_states), 1)[np.logical_not(batch_dones)]
+        self.Q.update(self.sess, batch_states, batch_actions, td_target)
+        self.Q_target.update(self.sess)
+
+
+
+
 
     def act(self, state, deterministic):
         """
@@ -65,14 +74,15 @@ class DQNAgent:
         if deterministic or r > self.epsilon:
             # TODO: take greedy action (argmax)
             # action_id = ...
+            state = state.reshape(-1, 4)
+            action_id = np.argmax(self.Q.predict(self.sess, state))
         else:
 
             # TODO: sample random action
             # Hint for the exploration in CarRacing: sampling the action from a uniform distribution will probably not work. 
             # You can sample the agents actions with different probabilities (need to sum up to 1) so that the agent will prefer to accelerate or going straight.
             # To see how the agent explores, turn the rendering in the training on and look what the agent is doing.
-            # action_id = ...
-          
+            action_id = np.random.randint(0, self.num_actions)
         return action_id
 
 
