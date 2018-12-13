@@ -120,7 +120,7 @@ class ConvolutionNeuralNetwork():
         conv3 = tf.layers.conv2d(conv2, filters=64, kernel_size=4, strides=2)
         #conv3_drop = tf.layers.dropout(conv3)
 
-        flatten = tf.layers.flatten(conv3)
+        flatten = tf.contrib.layers.flatten(conv3)
         fc1 = tf.layers.dense(flatten, 256, tf.nn.relu)
 
         self.predictions = tf.layers.dense(fc1, num_actions)
