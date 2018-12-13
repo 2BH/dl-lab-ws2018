@@ -96,24 +96,34 @@ class ConvolutionNeuralNetwork():
     """
     Neural Network class based on TensorFlow.
     """
-    def __init__(self, state_dim, num_actions, hidden=200, lr=1e-4):
-        self._build_model(state_dim, num_actions, hidden, lr)
+    def __init__(self, state_dim, num_actions,  history_length=0, hidden=200, lr=1e-4):
+        self._build_model(state_dim, num_actions, history_length, hidden, lr)
         
-    def _build_model(self, state_dim, num_actions, hidden, lr):
+    def _build_model(self, state_dim, num_actions, history_length, hidden, lr):
         """
         This method creates a neural network with two hidden fully connected layers and 20 neurons each. The output layer
         has #a neurons, where #a is the number of actions and has linear activation.
         Also creates its loss (mean squared loss) and its optimizer (e.g. Adam with a learning rate of 1e-4).
         """
 
-        self.states_ = tf.placeholder(tf.float32, shape=[None, state_dim])
+        self.states_ = tf.placeholder(tf.float32, shape=[None, *state_dim, history_length+1])
         self.actions_ = tf.placeholder(tf.int32, shape=[None])                  # Integer id of which action was selected
         self.targets_ = tf.placeholder(tf.float32,  shape=[None])               # The TD target value
 
-        # network
-        fc1 = tf.layers.dense(self.states_, hidden, tf.nn.relu)
-        fc2 = tf.layers.dense(fc1, hidden, tf.nn.relu)
-        self.predictions = tf.layers.dense(fc2, num_actions)
+
+        conv1 = tf.layers.conv2d(self.states_, filters=16, kernel_size=16, strides=2)
+        #conv1_drop = tf.layers.dropout(conv1, rate=0.3)
+
+        conv2 = tf.layers.conv2d(conv1, filters=32, kernel_size=8, strides=2)
+        #conv2_drop = tf.layers.dropout(conv2)
+
+        conv3 = tf.layers.conv2d(conv2, filters=64, kernel_size=4, strides=2)
+        #conv3_drop = tf.layers.dropout(conv3)
+
+        flatten = tf.layers.flatten(conv3)
+        fc1 = tf.layers.dense(flatten, 256, tf.nn.relu)
+
+        self.predictions = tf.layers.dense(fc1, num_actions)
 
         # Get the predictions for the chosen actions only
         batch_size = tf.shape(self.states_)[0]
@@ -161,8 +171,8 @@ class CNNTargetNetwork(ConvolutionNeuralNetwork):
     Slowly updated target network. Tau indicates the speed of adjustment. If 1,
     it is always set to the values of its associate.
     """
-    def __init__(self, state_dim, num_actions, hidden=20, lr=1e-4, tau=0.01):
-        super(TargetNetwork, self).__init__(state_dim, num_actions, hidden, lr)
+    def __init__(self, state_dim, num_actions, history_length=0, hidden=20, lr=1e-4, tau=0.01):
+        super(CNNTargetNetwork, self).__init__(state_dim, num_actions, history_length, hidden, lr)
         self.tau = tau
         self._associate = self._register_associate()
 

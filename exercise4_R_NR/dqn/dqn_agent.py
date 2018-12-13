@@ -20,8 +20,8 @@ class DQNAgent:
         self.Q = Q      
         self.Q_target = Q_target
         
+        # self.state_dim = Q.
         self.epsilon = epsilon
-
         self.num_actions = num_actions
         self.batch_size = batch_size
         self.discount_factor = discount_factor
@@ -72,17 +72,17 @@ class DQNAgent:
         """
         r = np.random.uniform()
         if deterministic or r > self.epsilon:
-            # TODO: take greedy action (argmax)
-            # action_id = ...
-            state = state.reshape(-1, 4)
-            action_id = np.argmax(self.Q.predict(self.sess, state))
+            # TODO: take greedy action (argmax)s
+            action_id = np.argmax(self.Q.predict(self.sess, [state]))
         else:
 
             # TODO: sample random action
             # Hint for the exploration in CarRacing: sampling the action from a uniform distribution will probably not work. 
             # You can sample the agents actions with different probabilities (need to sum up to 1) so that the agent will prefer to accelerate or going straight.
             # To see how the agent explores, turn the rendering in the training on and look what the agent is doing.
-            action_id = np.random.randint(0, self.num_actions)
+            action_probability = np.array([1, 2, 2, 10, 1])
+            action_probability = action_probability / np.sum(action_probability)
+            action_id = np.random.choice(5, p=action_probability)
         return action_id
 
 
