@@ -1,4 +1,9 @@
 import numpy as np
+LEFT = 1
+RIGHT = 2
+STRAIGHT = 0
+ACCELERATE = 3
+BRAKE = 4
 
 
 class EpisodeStats:
