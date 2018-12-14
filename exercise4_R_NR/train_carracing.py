@@ -88,7 +88,7 @@ def train_online(env, agent, num_episodes, skip_frames=0, max_timesteps=1000, hi
 
         # Hint: you can keep the episodes short in the beginning by changing max_timesteps (otherwise the car will spend most of the time out of the track)
         max_timesteps_reduced = int(np.max([300, max_timesteps * i / num_episodes]))
-        stats = run_episode(env, agent, skip_frames=skip_frames, max_timesteps=max_timesteps_reduced, deterministic=False, do_training=True, rendering=True)
+        stats = run_episode(env, agent, history_length=history_length, skip_frames=skip_frames, max_timesteps=max_timesteps_reduced, deterministic=False, do_training=True, rendering=False)
 
         tensorboard.write_episode_data(i, eval_dict={ "episode_reward" : stats.episode_reward, 
                                                       "straight" : stats.get_action_usage(STRAIGHT),
@@ -116,11 +116,11 @@ if __name__ == "__main__":
     # TODO: Define Q network, target network and DQN agent
     # ...
     state_dim = (96, 96)
-    history_length = 0
+    history_length = 2
     num_actions = 5
     skip_frames = 3
     Q = ConvolutionNeuralNetwork(state_dim, num_actions, history_length, hidden=200, lr=1e-4)
     Q_target = CNNTargetNetwork(state_dim, num_actions, history_length, hidden=200, lr=1e-4)
     agent = DQNAgent(Q, Q_target, num_actions, discount_factor=0.99, batch_size=64, epsilon=0.05)
-    train_online(env, agent, skip_frames=skip_frames, num_episodes=1000, max_timesteps=1000, history_length=history_length, model_dir="./models_carracing")
+    train_online(env, agent, skip_frames=skip_frames, num_episodes=1000, max_timesteps=3000, history_length=history_length, model_dir="./models_carracing")
 
