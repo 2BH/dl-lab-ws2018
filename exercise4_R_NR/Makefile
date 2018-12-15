@@ -16,3 +16,5 @@ clean:
 	rm -f *.pyc
 	rm -rf __pycache__
 	rm -f *.py~
+	rm -rf ./dqn/__pycache__
+	rm -f ./dqn/*.py~
