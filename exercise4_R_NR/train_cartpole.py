@@ -84,7 +84,8 @@ if __name__ == "__main__":
     # 3. train DQN agent with train_online(...)
     num_actions = 2
     state_dim = 4
+    method = "DQL"
     Q = NeuralNetwork(state_dim=state_dim, num_actions=num_actions)
     Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions)
-    agent = DQNAgent(Q, Q_target, num_actions, discount_factor=0.6, batch_size=64, epsilon=0.05)
-    train_online(env, agent, 4000)
+    agent = DQNAgent(Q, Q_target, num_actions, method=method, discount_factor=0.6, batch_size=64, epsilon=0.05)
+    train_online(env, agent, 3000)
