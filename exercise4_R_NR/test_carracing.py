@@ -1,5 +1,8 @@
 from __future__ import print_function
 
+import os
+from datetime import datetime
+import json
 import gym
 from dqn.dqn_agent import DQNAgent
 from train_carracing import run_episode
@@ -12,12 +15,10 @@ if __name__ == "__main__":
 
     env = gym.make("CarRacing-v0").unwrapped
 
-    history_length =  0
-
     #TODO: Define networks and load agent
     # ....
     state_dim = (96, 96)
-    history_length = 0
+    history_length = 2
     num_actions = 5
     skip_frames = 3
     Q = ConvolutionNeuralNetwork(state_dim, num_actions, history_length, hidden=200, lr=1e-4)
@@ -28,7 +29,7 @@ if __name__ == "__main__":
 
     episode_rewards = []
     for i in range(n_test_episodes):
-        stats = run_episode(env, agent, deterministic=True, do_training=False, rendering=True)
+        stats = run_episode(env, agent, history_length=history_length, deterministic=True, do_training=False, rendering=True)
         episode_rewards.append(stats.episode_reward)
 
     # save results in a dictionary and write them into a .json file
