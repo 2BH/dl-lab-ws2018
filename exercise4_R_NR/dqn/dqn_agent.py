@@ -4,7 +4,7 @@ from dqn.replay_buffer import ReplayBuffer
 
 class DQNAgent:
 
-    def __init__(self, Q, Q_target, num_actions, method="CQL", discount_factor=0.99, batch_size=64, epsilon=0.05):
+    def __init__(self, Q, Q_target, num_actions, game="cartpole" ,explore_type="epsilon_greedy", epsilon_decay=1, epsilon_min=0.05, tau=1, method="CQL", discount_factor=0.99, batch_size=64, epsilon=0.05):
         """
          Q-Learning agent for off-policy TD control using Function Approximation.
          Finds the optimal greedy policy while following an epsilon-greedy policy.
@@ -19,20 +19,28 @@ class DQNAgent:
         """
         self.Q = Q      
         self.Q_target = Q_target
-        
+        # now support cartpole or carracing two games
+        self.game = game
         # self.state_dim = Q.
         self.epsilon = epsilon
         self.num_actions = num_actions
         self.batch_size = batch_size
         self.discount_factor = discount_factor
-
+        # now support CQL(classical Q) or DQL(Double Q) 
+        self.method = method
+        self.explore_type = explore_type
+        # for epsilon annealing
+        self.epsilon_decay = epsilon_decay
+        self.epsilon_min = epsilon_min
+        # for boltzmann exploration
+        self.tau = tau
         # define replay buffer
         self.replay_buffer = ReplayBuffer()
-
-        # Start tensorflow session
+        
+        # start tensorflow session
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
-        self.method = method
+        
         self.saver = tf.train.Saver()
 
 
@@ -75,22 +83,49 @@ class DQNAgent:
         Returns:
             action id
         """
-        r = np.random.uniform()
-        if deterministic or r > self.epsilon:
-            # TODO: take greedy action (argmax)s
+        if deterministic:
             action_id = np.argmax(self.Q.predict(self.sess, [state]))
         else:
-
-            # TODO: sample random action
-            # Hint for the exploration in CarRacing: sampling the action from a uniform distribution will probably not work. 
-            # You can sample the agents actions with different probabilities (need to sum up to 1) so that the agent will prefer to accelerate or going straight.
-            # To see how the agent explores, turn the rendering in the training on and look what the agent is doing.
-            action_id = np.random.randint(self.num_actions)
-            #action_probability = np.array([1, 2, 2, 10, 1])
-            #action_probability = action_probability / np.sum(action_probability)
-            #action_id = np.random.choice(self.num_actions, p=action_probability)
+            if self.explore_type == "epsilon_greedy":
+                if self.epsilon > self.epsilon_min:
+                    self.epsilon *= self.epsilon_decay
+                r = np.random.uniform()
+                if r > self.epsilon:
+                    # TODO: take greedy action (argmax)
+                    action_id = np.argmax(self.Q.predict(self.sess, [state]))
+                else:
+                    # TODO: sample random action
+                    # Hint for the exploration in CarRacing: sampling the action from a uniform distribution will probably not work. 
+                    # You can sample the agents actions with different probabilities (need to sum up to 1) so that the agent will prefer to accelerate or going straight.
+                    # To see how the agent explores, turn the rendering inthe training on and look what the agent is doing.
+                    if self.game == "cartpole":
+                        action_id = np.random.randint(self.num_actions)
+                    elif self.game == "carracing":
+                        action_probability = np.array([1, 2, 2, 10, 1, 1, 1])
+                        action_probability = action_probability / np.sum(action_probability)
+                        action_id = np.random.choice(self.num_actions, p=action_probability)
+                    else:
+                        print("Invalid game")
+            elif self.explore_type == "boltzmann":
+                action_value = self.Q.predict(self.sess, [state])[0]
+                prob = self.softmax(action_value*self.tau)
+                action_id = np.random.choice(self.num_actions, p=prob)
+            else:
+                print("Invalid Exploration Type")
         return action_id
 
-
+    def softmax(self, input):
+        """
+        Safe Softmax function to avoid overflow
+        Args:
+            input: input vector
+        Returns:
+            prob: softmax of input
+        """
+        input_max = np.max(input)
+        e = np.exp(input-input_max)
+        prob = e / np.sum(e)
+        return prob
+        
     def load(self, file_name):
         self.saver.restore(self.sess, file_name)

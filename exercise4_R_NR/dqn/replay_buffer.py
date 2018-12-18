@@ -9,19 +9,35 @@ class ReplayBuffer:
     # TODO: implement a capacity for the replay buffer (FIFO, capacity: 1e5 - 1e6)
 
     # Replay buffer for experience replay. Stores transitions.
-    def __init__(self):
+    def __init__(self, max_size=1e6):
         self._data = namedtuple("ReplayBuffer", ["states", "actions", "next_states", "rewards", "dones"])
         self._data = self._data(states=[], actions=[], next_states=[], rewards=[], dones=[])
+        self.max_size = max_size
+        self.size = 0
 
     def add_transition(self, state, action, next_state, reward, done):
         """
         This method adds a transition to the replay buffer.
         """
-        self._data.states.append(state)
-        self._data.actions.append(action)
-        self._data.next_states.append(next_state)
-        self._data.rewards.append(reward)
-        self._data.dones.append(done)
+        if self.size <= self.max_size:
+            self.size += 1
+            self._data.states.append(state)
+            self._data.actions.append(action)
+            self._data.next_states.append(next_state)
+            self._data.rewards.append(reward)
+            self._data.dones.append(done)
+        else:
+            self._data.states.pop(0)
+            self._data.actions.pop(0)
+            self._data.next_states.pop(0)
+            self._data.rewards.pop(0)
+            self._data.dones.pop(0)
+
+            self._data.states.append(state)
+            self._data.actions.append(action)
+            self._data.next_states.append(next_state)
+            self._data.rewards.append(reward)
+            self._data.dones.append(done)
 
     def next_batch(self, batch_size):
         """

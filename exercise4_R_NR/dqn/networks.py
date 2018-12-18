@@ -124,7 +124,7 @@ class ConvolutionNeuralNetwork():
         nf1, nf2, nf3 = (16, 32, 48)
 
         # first conv layer
-        conv1_w = tf.Variable(tf.truncated_normal(shape=[fs1, fs1, 1, nf1], mean=mu, stddev=sigma), name="w1")
+        conv1_w = tf.Variable(tf.truncated_normal(shape=[fs1, fs1, history_length+1, nf1], mean=mu, stddev=sigma), name="w1")
         conv1_b = tf.Variable(tf.zeros(nf1), name="b1")
         conv1 = tf.nn.conv2d(self.states_, conv1_w, strides=[1, 1, 1, 1], padding='SAME') + conv1_b
         conv1 = tf.nn.relu(conv1)

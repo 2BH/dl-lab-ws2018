@@ -4,6 +4,8 @@ RIGHT = 2
 STRAIGHT = 0
 ACCELERATE = 3
 BRAKE = 4
+LEFT_ACCELERATE = 5
+RIGHT_ACCELERATE = 6
 
 
 class EpisodeStats:
@@ -27,11 +29,13 @@ def id_to_action(labels_id):
     # convert id format to action format
     classes = 3
     labels_action = np.zeros(classes)
-    labels_action[labels_id==1] = [-1.0, 0.0, 0.0]
-    labels_action[labels_id==2] = [1.0, 0.0, 0.0]
-    labels_action[labels_id==0] = [0.0, 0.0, 0.0]
-    labels_action[labels_id==3] = [0.0, 1.0, 0.0]
-    labels_action[labels_id==4] = [0.0, 0.0, 0.8]
+    labels_action[labels_id==LEFT] = [-1.0, 0.0, 0.0]
+    labels_action[labels_id==RIGHT] = [1.0, 0.0, 0.0]
+    labels_action[labels_id==STRAIGHT] = [0.0, 0.0, 0.0]
+    labels_action[labels_id==ACCELERATE] = [0.0, 1.0, 0.0]
+    labels_action[labels_id==BRAKE] = [0.0, 0.0, 0.8]
+    labels_action[labels_id==LEFT_ACCELERATE] = [-1.0, 1.0, 0.0]
+    labels_action[labels_id==RIGHT_ACCELERATE] = [0.0, 1.0, 0.0]
     
     return labels_action
 

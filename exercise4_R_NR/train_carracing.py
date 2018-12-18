@@ -81,7 +81,7 @@ def train_online(env, agent, num_episodes, skip_frames=0, max_timesteps=1000, hi
         os.mkdir(model_dir)  
  
     print("... train agent")
-    tensorboard = Evaluation(os.path.join(tensorboard_dir, "train"), ["episode_reward", "straight", "left", "right", "accel", "brake"])
+    tensorboard = Evaluation(os.path.join(tensorboard_dir, "train"), ["episode_reward", "straight", "left", "right", "accel", "brake", "left_acce", "right_acce"])
 
     for i in range(num_episodes):
         print("epsiode %d" % i)
@@ -95,13 +95,21 @@ def train_online(env, agent, num_episodes, skip_frames=0, max_timesteps=1000, hi
                                                       "left" : stats.get_action_usage(LEFT),
                                                       "right" : stats.get_action_usage(RIGHT),
                                                       "accel" : stats.get_action_usage(ACCELERATE),
-                                                      "brake" : stats.get_action_usage(BRAKE)
+                                                      "brake" : stats.get_action_usage(BRAKE),
+                                                      "left_acce" : stats.get_action_usage(LEFT_ACCELERATE),
+                                                      "right_acce" : stats.get_action_usage(RIGHT_ACCELERATE)
                                                       })
 
         # TODO: evaluate agent with deterministic actions from time to time
-        # ...
 
         if i % 100 == 0 or (i >= num_episodes - 1):
+            """
+            valid_episode_reward = 0
+            for j in range(3):
+                valid_stats = run_episode(env, agent, history_length=history_length, skip_frames=skip_frames, max_timesteps=max_timesteps_reduced, deterministic=False, do_training=True, rendering=False)
+                valid_episode_reward += valid_stats.episode_reward
+            tensorboard.write_episode_data(i, eval_dict={ "valid_episode_reward" : valid_episode_reward/3})
+            """
             agent.saver.save(agent.sess, os.path.join(model_dir, "dqn_agent.ckpt")) 
 
     tensorboard.close_session()
@@ -117,10 +125,17 @@ if __name__ == "__main__":
     # ...
     state_dim = (96, 96)
     history_length = 2
-    num_actions = 5
-    skip_frames = 3
-    Q = ConvolutionNeuralNetwork(state_dim, num_actions, history_length, hidden=200, lr=1e-4)
-    Q_target = CNNTargetNetwork(state_dim, num_actions, history_length, hidden=200, lr=1e-4)
-    agent = DQNAgent(Q, Q_target, num_actions, discount_factor=0.99, batch_size=64, epsilon=0.05)
-    train_online(env, agent, skip_frames=skip_frames, num_episodes=1000, max_timesteps=3000, history_length=history_length, model_dir="./models_carracing")
+    num_actions = 7
+    skip_frames = 2
+    method = "DQL"
+    # method = "CQL"
+    game = "carracing"
+    epsilon = 0.05
+    epsilon_decay = 0.95
+    explore_type = "boltzmann"
+    tau = 0.5
+    Q = ConvolutionNeuralNetwork(state_dim=state_dim, num_actions=num_actions, history_length=history_length, hidden=300, lr=1e-4)
+    Q_target = CNNTargetNetwork(state_dim=state_dim, num_actions=num_actions, history_length=history_length, hidden=300, lr=1e-4)
+    agent = DQNAgent(Q, Q_target, num_actions, method=method, discount_factor=0.6, batch_size=64, epsilon=epsilon, epsilon_decay=epsilon_decay, explore_type=explore_type, game=game, tau=tau)
+    train_online(env, agent, skip_frames=skip_frames, num_episodes=1500, max_timesteps=3000, history_length=history_length, model_dir="./models_carracing")
 

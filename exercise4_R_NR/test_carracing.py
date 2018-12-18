@@ -19,11 +19,19 @@ if __name__ == "__main__":
     # ....
     state_dim = (96, 96)
     history_length = 2
-    num_actions = 5
+    num_actions = 7
     skip_frames = 3
-    Q = ConvolutionNeuralNetwork(state_dim, num_actions, history_length, hidden=200, lr=1e-4)
-    Q_target = CNNTargetNetwork(state_dim, num_actions, history_length, hidden=200, lr=1e-4)
-    agent = DQNAgent(Q, Q_target, num_actions, discount_factor=0.99, batch_size=64, epsilon=0.05)
+    method = "DQL"
+    # method = "CQL"
+    game = "carracing"
+    epsilon = 0.05
+    epsilon_decay = 0.95
+    explore_type = "boltzmann"
+    tau = 0.5
+    
+    Q = NeuralNetwork(state_dim=state_dim, num_actions=num_actions, hidden=200, lr=1e-4)
+    Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions, hidden=200, lr=1e-4)
+    agent = DQNAgent(Q, Q_target, num_actions, method=method, discount_factor=0.6, batch_size=64, epsilon=epsilon, epsilon_decay=epsilon_decay, explore_type=explore_type, game=game, tau=tau)
     agent.load("./models_carracing/dqn_agent.ckpt")
     n_test_episodes = 15
 

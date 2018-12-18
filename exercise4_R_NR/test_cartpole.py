@@ -17,9 +17,14 @@ if __name__ == "__main__":
     # ...
     num_actions = 2
     state_dim = 4
-    Q = NeuralNetwork(state_dim=state_dim, num_actions=num_actions)
-    Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions)
-    agent = DQNAgent(Q, Q_target, num_actions, discount_factor=0.99, batch_size=64, epsilon=0.05)
+    method = "DQL"
+    game = "cartpole"
+    epsilon = 0.5
+    epsilon_decay = 0.95
+    explore_type = "epsilon_greedy"
+    Q = NeuralNetwork(state_dim=state_dim, num_actions=num_actions, hidden=200, lr=1e-4)
+    Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions, hidden=200, lr=1e-4)
+    agent = DQNAgent(Q, Q_target, num_actions, method=method, discount_factor=0.6, batch_size=64, epsilon=epsilon, epsilon_decay=epsilon_decay, explore_type=explore_type, game=game)
 
     agent.load("./models_cartpole/dqn_agent.ckpt")
  
