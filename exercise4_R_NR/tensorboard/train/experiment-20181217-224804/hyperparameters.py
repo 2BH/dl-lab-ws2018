@@ -1,0 +1,21 @@
+    # 3. train DQN agent with train_online(...)
+    num_actions = 2
+    state_dim = 4
+    method = "DQL"
+    game = "cartpole"
+    epsilon = 0.3   
+    epsilon_decay = 0.999
+    explore_type = "epsilon_greedy"
+    epsilon_min = 0.05
+    tau = 0.5
+    Q = NeuralNetwork(state_dim=state_dim, num_actions=num_actions, hidden=200, lr=1e-4)
+    Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions, hidden=200, lr=1e-4)
+    agent = DQNAgent(Q, Q_target, num_actions,
+                     method=method,
+                     discount_factor=0.8,
+                     batch_size=64,
+                     epsilon=epsilon,
+                     epsilon_decay=epsilon_decay,
+                     explore_type=explore_type,
+                     epsilon_min=epsilon_min,
+                     game=game, tau=tau)

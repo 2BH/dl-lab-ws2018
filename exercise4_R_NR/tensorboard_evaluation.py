@@ -16,11 +16,18 @@ class Evaluation:
         self.stats = stats
         self.pl_stats = {}
         
+        valid = []
+        train = []
+
         for s in self.stats:
             self.pl_stats[s] = tf.placeholder(tf.float32, name=s)
-            tf.summary.scalar(s, self.pl_stats[s])
-            
-        self.performance_summaries = tf.summary.merge_all()
+            if s != "valid_episode_reward":
+              train.append(tf.summary.scalar(s, self.pl_stats[s]))
+            else:
+              valid.append(tf.summary.scalar(s, self.pl_stats[s]))
+        
+        self.performance_summaries = tf.summary.merge(train)
+        self.validation_summaries = tf.summary.merge(valid)
 
     def write_episode_data(self, episode, eval_dict):
        """
@@ -29,13 +36,24 @@ class Evaluation:
        """
        my_dict = {}
        for k in eval_dict:
-          assert(k in self.stats)
-          my_dict[self.pl_stats[k]] = eval_dict[k]
+           assert(k in self.stats)
+           my_dict[self.pl_stats[k]] = eval_dict[k]
 
        summary = self.sess.run(self.performance_summaries, feed_dict=my_dict)
 
        self.tf_writer.add_summary(summary, episode)
        self.tf_writer.flush()
+
+    def write_valid_episode_data(self, episode, eval_dict):
+        my_dict = {}
+        for k in eval_dict:
+            assert(k in self.stats)
+            my_dict[self.pl_stats[k]] = eval_dict[k]
+
+        summary = self.sess.run(self.validation_summaries, feed_dict=my_dict)
+
+        self.tf_writer.add_summary(summary, episode)
+        self.tf_writer.flush()
 
     def close_session(self):
         self.tf_writer.close()

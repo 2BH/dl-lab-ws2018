@@ -108,7 +108,7 @@ class DQNAgent:
                         print("Invalid game")
             elif self.explore_type == "boltzmann":
                 action_value = self.Q.predict(self.sess, [state])[0]
-                prob = self.softmax(action_value*self.tau)
+                prob = self.softmax(action_value/self.tau)
                 action_id = np.random.choice(self.num_actions, p=prob)
             else:
                 print("Invalid Exploration Type")
