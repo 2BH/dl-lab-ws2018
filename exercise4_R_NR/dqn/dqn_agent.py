@@ -98,7 +98,7 @@ class DQNAgent:
                     # Hint for the exploration in CarRacing: sampling the action from a uniform distribution will probably not work. 
                     # You can sample the agents actions with different probabilities (need to sum up to 1) so that the agent will prefer to accelerate or going straight.
                     # To see how the agent explores, turn the rendering inthe training on and look what the agent is doing.
-                    if self.game == "cartpole":
+                    if self.game == "cartpole" or self.game == "mountaincar":
                         action_id = np.random.randint(self.num_actions)
                     elif self.game == "carracing":
                         action_probability = np.array([1, 2, 2, 10, 1, 1, 1])
