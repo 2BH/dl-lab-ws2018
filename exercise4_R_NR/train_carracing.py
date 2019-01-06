@@ -139,8 +139,8 @@ if __name__ == "__main__":
     Q = ConvolutionNeuralNetwork(state_dim=state_dim, num_actions=num_actions, history_length=history_length, hidden=300, lr=3e-4)
     Q_target = CNNTargetNetwork(state_dim=state_dim, num_actions=num_actions, history_length=history_length, hidden=300, lr=3e-4)
     agent = DQNAgent(Q, Q_target, num_actions, method=method, discount_factor=0.98, batch_size=64, epsilon=epsilon, epsilon_decay=epsilon_decay, explore_type=explore_type, game=game, tau=tau, epsilon_min=epsilon_min)
-    train_online(env, agent, skip_frames=skip_frames, num_episodes=1500, max_timesteps=1000, history_length=history_length, model_dir="./models_carracing")
-
+    train_online(env, agent, skip_frames=skip_frames, num_episodes=1200, max_timesteps=1000, history_length=history_length, model_dir="./models_carracing")
+    """
     os.system('python test_carracing.py')
 
     
@@ -161,4 +161,4 @@ if __name__ == "__main__":
     agent = DQNAgent(Q, Q_target, num_actions, method=method, discount_factor=0.98, batch_size=64, epsilon=epsilon, epsilon_decay=epsilon_decay, explore_type=explore_type, game=game, tau=tau, epsilon_min=epsilon_min)
     train_online(env, agent, skip_frames=skip_frames, num_episodes=1500, max_timesteps=1000, history_length=history_length, model_dir="./models_carracing")
     
-    os.system('python test_carracing.py')
+    os.system('python test_carracing.py')"""
