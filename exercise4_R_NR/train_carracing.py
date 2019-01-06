@@ -10,6 +10,7 @@ from dqn.networks import ConvolutionNeuralNetwork, CNNTargetNetwork
 from tensorboard_evaluation import *
 import itertools as it
 from utils import *
+import os
 
 def run_episode(env, agent, deterministic, skip_frames=0,  do_training=True, rendering=False, max_timesteps=1000, history_length=0):
     """
@@ -81,7 +82,7 @@ def train_online(env, agent, num_episodes, skip_frames=0, max_timesteps=1000, hi
         os.mkdir(model_dir)  
  
     print("... train agent")
-    tensorboard = Evaluation(os.path.join(tensorboard_dir, "train"), ["episode_reward", "straight", "left", "right", "accel", "brake", "left_acce", "right_acce"])
+    tensorboard = Evaluation(os.path.join(tensorboard_dir, "train"), ["episode_reward", "valid_episode_reward", "straight", "left", "right", "accel", "brake", "left_acce", "right_acce"])
 
     for i in range(num_episodes):
         print("epsiode %d" % i)
@@ -103,13 +104,11 @@ def train_online(env, agent, num_episodes, skip_frames=0, max_timesteps=1000, hi
         # TODO: evaluate agent with deterministic actions from time to time
 
         if i % 100 == 0 or (i >= num_episodes - 1):
-            """
             valid_episode_reward = 0
             for j in range(3):
-                valid_stats = run_episode(env, agent, history_length=history_length, skip_frames=skip_frames, max_timesteps=max_timesteps_reduced, deterministic=False, do_training=True, rendering=False)
+                valid_stats = run_episode(env, agent, history_length=history_length, skip_frames=skip_frames, max_timesteps=max_timesteps, deterministic=True, do_training=False, rendering=False)
                 valid_episode_reward += valid_stats.episode_reward
-            tensorboard.write_episode_data(i, eval_dict={ "valid_episode_reward" : valid_episode_reward/3})
-            """
+            tensorboard.write_valid_episode_data(i, eval_dict={ "valid_episode_reward" : valid_episode_reward/3})
             agent.saver.save(agent.sess, os.path.join(model_dir, "dqn_agent.ckpt")) 
 
     tensorboard.close_session()
@@ -123,19 +122,43 @@ if __name__ == "__main__":
     
     # TODO: Define Q network, target network and DQN agent
     # ...
+
+
     state_dim = (96, 96)
     history_length = 2
-    num_actions = 7
-    skip_frames = 2
-    method = "DQL"
+    num_actions = 5
+    skip_frames = 3
+    method = "CQL"
     # method = "CQL"
     game = "carracing"
     epsilon = 0.05
-    epsilon_decay = 0.95
-    explore_type = "boltzmann"
+    epsilon_decay = 1
+    epsilon_min = 0.03
+    explore_type = "epsilon_greedy"
     tau = 0.5
-    Q = ConvolutionNeuralNetwork(state_dim=state_dim, num_actions=num_actions, history_length=history_length, hidden=300, lr=1e-4)
-    Q_target = CNNTargetNetwork(state_dim=state_dim, num_actions=num_actions, history_length=history_length, hidden=300, lr=1e-4)
-    agent = DQNAgent(Q, Q_target, num_actions, method=method, discount_factor=0.6, batch_size=64, epsilon=epsilon, epsilon_decay=epsilon_decay, explore_type=explore_type, game=game, tau=tau)
-    train_online(env, agent, skip_frames=skip_frames, num_episodes=1500, max_timesteps=3000, history_length=history_length, model_dir="./models_carracing")
+    Q = ConvolutionNeuralNetwork(state_dim=state_dim, num_actions=num_actions, history_length=history_length, hidden=300, lr=3e-4)
+    Q_target = CNNTargetNetwork(state_dim=state_dim, num_actions=num_actions, history_length=history_length, hidden=300, lr=3e-4)
+    agent = DQNAgent(Q, Q_target, num_actions, method=method, discount_factor=0.98, batch_size=64, epsilon=epsilon, epsilon_decay=epsilon_decay, explore_type=explore_type, game=game, tau=tau, epsilon_min=epsilon_min)
+    train_online(env, agent, skip_frames=skip_frames, num_episodes=1500, max_timesteps=1000, history_length=history_length, model_dir="./models_carracing")
 
+    os.system('python test_carracing.py')
+
+    
+    state_dim = (96, 96)
+    history_length = 2
+    num_actions = 5
+    skip_frames = 3
+    method = "DQL"
+    # method = "CQL"
+    game = "carracing"
+    epsilon = 0.3
+    epsilon_decay = 0.99
+    epsilon_min = 0.03
+    explore_type = "epsilon_greedy"
+    tau = 2
+    Q = ConvolutionNeuralNetwork(state_dim=state_dim, num_actions=num_actions, history_length=history_length, hidden=300, lr=3e-4)
+    Q_target = CNNTargetNetwork(state_dim=state_dim, num_actions=num_actions, history_length=history_length, hidden=300, lr=3e-4)
+    agent = DQNAgent(Q, Q_target, num_actions, method=method, discount_factor=0.98, batch_size=64, epsilon=epsilon, epsilon_decay=epsilon_decay, explore_type=explore_type, game=game, tau=tau, epsilon_min=epsilon_min)
+    train_online(env, agent, skip_frames=skip_frames, num_episodes=1500, max_timesteps=1000, history_length=history_length, model_dir="./models_carracing")
+    
+    os.system('python test_carracing.py')

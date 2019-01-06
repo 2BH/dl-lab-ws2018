@@ -101,7 +101,8 @@ class DQNAgent:
                     if self.game == "cartpole" or self.game == "mountaincar":
                         action_id = np.random.randint(self.num_actions)
                     elif self.game == "carracing":
-                        action_probability = np.array([1, 2, 2, 10, 1, 1, 1])
+                        # action_probability = np.array([1, 2, 2, 10, 1, 1, 1])
+                        action_probability = np.array([2, 5, 5, 10, 1])
                         action_probability = action_probability / np.sum(action_probability)
                         action_id = np.random.choice(self.num_actions, p=action_probability)
                     else:
