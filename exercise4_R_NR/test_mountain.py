@@ -10,7 +10,6 @@ import numpy as np
 np.random.seed(0)
 
 if __name__ == "__main__":
-s
 
     # TODO: load DQN agent
     # ...
