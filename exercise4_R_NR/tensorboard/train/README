@@ -1,9 +1,8 @@
-  
-  ### How to read these hyperparameters:
-  
+### How to read these hyperparameters:
   
   
-  ```python
+  
+```python
     num_actions = 2 # number of actions, predefined by gym env
     state_dim = 4 # same as above
     method = "DQL" # double Q learning, if CQL then standard Q learning
