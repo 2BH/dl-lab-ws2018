@@ -1,9 +1,9 @@
   
-  How to read these hyperparameters:
+  ### How to read these hyperparameters:
   
   
   
-  
+  ```python
     num_actions = 2 # number of actions, predefined by gym env
     state_dim = 4 # same as above
     method = "DQL" # double Q learning, if CQL then standard Q learning
@@ -32,18 +32,19 @@
                      
     # the last argument, the integer of train_online function is the number of training episodes, but it never reached since the others break the training process, so please use tensorboard to check the number of episodes
     
-    # the action probability of carracing is weighted by [2, 5, 5, 10, 1], (LEFT = 1
-RIGHT = 2
-STRAIGHT = 0
-ACCELERATE = 3
-BRAKE = 4)
+    # the action probability of carracing is weighted by [2, 5, 5, 10, 1], 
+    (LEFT = 1
+    RIGHT = 2
+    STRAIGHT = 0
+    ACCELERATE = 3
+    BRAKE = 4)
 
-# the tau of behaviour network and target network is 0.01 (as we discussed)
-# batch size is always 64, 
+    # the tau of behaviour network and target network is 0.01 (as we discussed)
+    # batch size is always 64, 
+    # the replay_buffer size is: 1e5
     train_online(env, agent, 1600)
+    # the max_timesteps are reduced to 300 for the first 30% training episodes
+```python
     
     
     
-    
- Remard:
- For carracing using classical q learning and epsilon anneal, it has only been trained for 550 episodes, but still achieve a very good result in testing. I'm now training it again, and once it finished, I will send you the new result. Sorry for the inconvenince
