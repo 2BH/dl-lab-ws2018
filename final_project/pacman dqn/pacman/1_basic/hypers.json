@@ -1,0 +1,1 @@
+{"save_hypers": true, "big": false, "diff_history": false, "history_length": 0, "buffer_capacity": 500000.0, "double_q": false, "tau": 0.01, "boltzmann": false, "epsilon_decay": 0.0, "epsilon": 0.05, "batch_size": 64, "discount_factor": 0.99, "lr": 0.0001, "model_path": "./pacman/1_basic", "name": "1_basic"}
